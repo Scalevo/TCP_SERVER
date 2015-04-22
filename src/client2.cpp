@@ -12,7 +12,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#define PORT 1234
+#define PORT 2000
 #define RCVBUFSIZE 8192
 
 /* Funktion gibt aufgetretenen Fehler aus und

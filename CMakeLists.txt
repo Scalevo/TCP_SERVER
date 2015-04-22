@@ -8,6 +8,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  message_generation
+  
 )
 
 ## System dependencies are found with CMake's conventions
@@ -44,11 +46,12 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
+add_message_files(
+   FILES
 #   Message1.msg
 #   Message2.msg
-# )
+
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -65,10 +68,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+   DEPENDENCIES
+   std_msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -79,12 +82,24 @@ find_package(catkin REQUIRED COMPONENTS
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
+#catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES tcp_server
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
+#)
+
+
+catkin_package(
+	INCLUDE_DIRS include
+#  LIBRARIES lasertech
+    CATKIN_DEPENDS sensor_msgs
+#  DEPENDS system_lib
+
+CATKIN_DEPENDS message_runtime
 )
+
+
 
 ###########
 ## Build ##
@@ -161,3 +176,24 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+
+add_executable(server src/server.cpp)
+target_link_libraries(server ${catkin_LIBRARIES})
+add_dependencies(server lasertech_generate_messages_cpp)
+
+add_executable(client src/client.cpp)
+target_link_libraries(client ${catkin_LIBRARIES})
+add_dependencies(client lasertech_generate_messages_cpp)
+
+#add_executable(server2 src/server2.cpp)
+#target_link_libraries(server2 ${catkin_LIBRARIES})
+#add_dependencies(server2 lasertech_generate_messages_cpp)
+
+add_executable(serverIMU src/serverIMU.cpp)
+target_link_libraries(serverIMU ${catkin_LIBRARIES})
+add_dependencies(serverIMU lasertech_generate_messages_cpp)
+
+add_executable(client2 src/client2.cpp)
+target_link_libraries(client2 ${catkin_LIBRARIES})
+add_dependencies(client2 lasertech_generate_messages_cpp)
