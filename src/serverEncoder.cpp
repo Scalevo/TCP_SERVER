@@ -44,9 +44,23 @@
 
 #include <stdlib.h>
 
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+
+#include "nav_msgs/Odometry.h"
+#include "std_msgs/Float64.h"
+#include "lasertech/ScalevoWheels.h"
+
+#include <sstream>
+
+
+
+#include <math.h>
+
+
 
 /* Portnummer */
-#define PORT 4000
+#define PORT 2001
 
 /* Puffer für eingehende Nachrichten */
 #define RCVBUFSIZE 1024
@@ -76,7 +90,6 @@ static void echo(int client_socket)
             echo_buffer, ctime(&zeit));
 
     std::string s = echo_buffer;
-    std::cout << " parameter vom myRIO" << " " << s << std::endl;
 
     std::string delimiter = ":";
     std::string delimiter2 = ",";
@@ -85,7 +98,7 @@ static void echo(int client_socket)
     int count=0;
     std::string header;
     std::string parameter_x;
-    double imu_values[9];
+    double values[9];
     //here the string will be separeted into 2 parts
     //1. # Bytes and MSG Code
 
@@ -102,44 +115,43 @@ static void echo(int client_socket)
     while ((pos2 = s.find(delimiter2)) != std::string::npos) {
     //count++;
     parameter_x = s.substr(0, pos2);
-    imu_values[count]=atof (parameter_x.c_str());
+    values[count]=atof (parameter_x.c_str());
     std::cout << " parameter_" << count++ << " " << parameter_x << std::endl;
     //std::cout << " s zum zweiten: " << s << std::endl;
     s.erase(0, pos2 + delimiter2.length());
     }
     std::cout << " parameter_" << count << " " << s << std::endl;
 
-    ros::NodeHandle m;
-    ros::Publisher chatter_pub_imu = m.advertise<sensor_msgs::Imu>("serverIMU", 1000);
+    //ros::NodeHandle m;
+    //ros::Publisher chatter_pub_imu = m.advertise<sensor_msgs::Imu>("serverIMU", 1000);
+    ros::NodeHandle n;
 
-    sensor_msgs::Imu msgImu;
-    float Zahl = rand()*M_PI;
-    msgImu.header.stamp = ros::Time::now();
+    ros::Publisher chatter_pub = n.advertise<lasertech::ScalevoWheels>("serverEncoder", 1000);
+    //sensor_msgs::Imu msgImu;
+    //float Zahl = rand()*M_PI;
+    //msgImu.header.stamp = ros::Time::now();
     //msgImu.orientation_covariance[0]=Zahl;
 
-    msgImu.header.frame_id="IMU";
+    //msgImu.header.frame_id="IMU";
 
 
+    lasertech::ScalevoWheels msgEncoder;
+    msgEncoder.header.frame_id="Encoder_data";
+    // Message for Wheels
+    msgEncoder.travel[0]=values[0];
+    msgEncoder.travel[1]=values[1];
+    msgEncoder.speed[0]=values[2];
+    msgEncoder.speed[1]=values[3];
 
-    //die sind noch nicth implementiert *****
-    msgImu.orientation.x=imu_values[1];
-    msgImu.orientation.y=imu_values[1];
-    msgImu.orientation.z=imu_values[1];
-    msgImu.orientation.w=imu_values[1];
+    // Message for Tracks
+    msgEncoder.travel_tracks[0]=values[4];
+    msgEncoder.travel_tracks[1]=values[5];
+    msgEncoder.speed_tracks[0]=values[6];
+    msgEncoder.speed_tracks[1]=values[7];
+    msgEncoder.header.stamp = ros::Time::now();
 
-    //die sind jetzt richtig in m/s²
-    msgImu.linear_acceleration.x=imu_values[3];
-    msgImu.linear_acceleration.y=imu_values[4];
-    msgImu.linear_acceleration.z=imu_values[5];
-
-    //die sind jetzt richtig in rad/s
-    msgImu.angular_velocity.x =imu_values[6];
-    msgImu.angular_velocity.y=imu_values[7];
-    msgImu.angular_velocity.z=imu_values[8];
-
-
-    std::cout << msgImu;
-    chatter_pub_imu.publish(msgImu);
+    std::cout << msgEncoder;
+    chatter_pub.publish(msgEncoder);
 
 }
 
@@ -159,9 +171,9 @@ int main( int argc, char *argv[]) {
 
     unsigned int len;
 
-      ros::init(argc, argv, "serverIMU");
+      ros::init(argc, argv, "serverEncoder");
       ros::NodeHandle n;
-      ros::Publisher chatter_pub = n.advertise<sensor_msgs::Imu>("serverIMU", 1000);
+      ros::Publisher chatter_pub = n.advertise<lasertech::ScalevoWheels>("serverEncoder", 1000);
       ros::Rate loop_rate(1000);
 
     /* Erzeuge das Socket. */

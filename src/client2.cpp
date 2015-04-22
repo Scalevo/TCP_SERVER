@@ -12,7 +12,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#define PORT 2000
+#define PORT 4000
 #define RCVBUFSIZE 8192
 
 /* Funktion gibt aufgetretenen Fehler aus und
@@ -28,6 +28,13 @@ int main( int argc, char *argv[]) {
     struct sockaddr_in server;
     struct hostent *host_info;
     unsigned long addr;
+
+    union test {
+      char c[4];
+      int i;
+    }t;
+
+    t.i=98;
 
 
     int sock;
@@ -74,7 +81,11 @@ int main( int argc, char *argv[]) {
                    "Server herstellen");
 
     /* Zweites Argument wird als "echo" beim Server verwendet. */
-    echo_string = argv[2];
+    char str[98];
+    strcpy( str, t.c);
+    strcat( str, argv[2]);
+
+    echo_string = str;
     /* Länge der Eingabe */
     echo_len = strlen(echo_string);
 
@@ -85,7 +96,7 @@ int main( int argc, char *argv[]) {
 
 
     /* Schließe Verbindung und Socket. */
-   close(sock);
+   //close(sock);
 
     return EXIT_SUCCESS;
 }

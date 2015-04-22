@@ -164,6 +164,14 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
+add_executable(serverIMU src/serverIMU.cpp)
+target_link_libraries(serverIMU ${catkin_LIBRARIES})
+add_dependencies(serverIMU tcp_server_generate_messages_cpp)
+
+add_executable(serverEncoder src/serverEncoder.cpp)
+target_link_libraries(serverEncoder ${catkin_LIBRARIES})
+add_dependencies(serverEncoder tcp_server_generate_messages_cpp)
+
 #############
 ## Testing ##
 #############
@@ -178,22 +186,24 @@ include_directories(
 # catkin_add_nosetests(test)
 
 
-add_executable(server src/server.cpp)
-target_link_libraries(server ${catkin_LIBRARIES})
-add_dependencies(server lasertech_generate_messages_cpp)
+#add_executable(server src/server.cpp)
+#target_link_libraries(server ${catkin_LIBRARIES})
+#add_dependencies(server lasertech_generate_messages_cpp)
 
-add_executable(client src/client.cpp)
-target_link_libraries(client ${catkin_LIBRARIES})
-add_dependencies(client lasertech_generate_messages_cpp)
+#add_executable(client src/client.cpp)
+#target_link_libraries(client ${catkin_LIBRARIES})
+#add_dependencies(client lasertech_generate_messages_cpp)
 
 #add_executable(server2 src/server2.cpp)
 #target_link_libraries(server2 ${catkin_LIBRARIES})
 #add_dependencies(server2 lasertech_generate_messages_cpp)
 
-add_executable(serverIMU src/serverIMU.cpp)
-target_link_libraries(serverIMU ${catkin_LIBRARIES})
-add_dependencies(serverIMU lasertech_generate_messages_cpp)
-
 add_executable(client2 src/client2.cpp)
 target_link_libraries(client2 ${catkin_LIBRARIES})
 add_dependencies(client2 lasertech_generate_messages_cpp)
+
+
+
+
+
+
