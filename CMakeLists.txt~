@@ -190,9 +190,6 @@ add_executable(client3 src/client3.cpp)
 target_link_libraries(client3 ${catkin_LIBRARIES})
 add_dependencies(client3 tcp_server_generate_messages_cpp)
 
-add_executable(client4 src/client4.cpp)
-target_link_libraries(client4 ${catkin_LIBRARIES})
-add_dependencies(client4 tcp_server_generate_messages_cpp)
 
 
 #add_executable(server src/server.cpp)

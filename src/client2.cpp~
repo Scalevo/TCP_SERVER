@@ -97,7 +97,7 @@ argv[2]="aölsdfjsdlkjf";
 
 
     /* Schließe Verbindung und Socket. */
-   close(sock);
+   //close(sock);
 
     return EXIT_SUCCESS;
 }
