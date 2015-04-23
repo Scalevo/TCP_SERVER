@@ -186,6 +186,12 @@ add_dependencies(serverEncoder tcp_server_generate_messages_cpp)
 # catkin_add_nosetests(test)
 
 
+add_executable(client3 src/client3.cpp)
+target_link_libraries(client3 ${catkin_LIBRARIES})
+add_dependencies(client3 tcp_server_generate_messages_cpp)
+
+
+
 #add_executable(server src/server.cpp)
 #target_link_libraries(server ${catkin_LIBRARIES})
 #add_dependencies(server lasertech_generate_messages_cpp)
