@@ -145,7 +145,7 @@ bool tcp_client::send_data(string data)
 string tcp_client::receive(int size=512)
 {
 
-  cout<<"tcp_client::receive()";
+  cout<<"tcp_client::receive()"<<"\n";
 
   //char buffer[size];
 	string reply;
@@ -156,7 +156,7 @@ string tcp_client::receive(int size=512)
 	if( n < 0)
 	{
 		puts("recv_failed");
-		receive(1024);
+		//receive(1024);
 	}
 
 	for(int i=0;i<100;i++){
