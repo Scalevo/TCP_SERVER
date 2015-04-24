@@ -9,8 +9,26 @@
 #include<arpa/inet.h> //inet_addr
 #include<netdb.h> //hostent
  
+
+#include <signal.h> //crtl+c
+
+#include <stdlib.h>
+#include <stdio.h>
+
+#include <stdlib.h>
+#include <stdio.h>
+
+  #include <unistd.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+
 using namespace std;
  
+	char buffer[512];
+
 /**
     TCP Client class
 */
@@ -126,52 +144,55 @@ bool tcp_client::send_data(string data)
 */
 string tcp_client::receive(int size=512)
 {
-    char buffer[size];
-    string reply;
-string blabla, blabla1,blabla2;
-     int n;
-    //Receive a reply from the server
+	//char buffer[size];
+	string reply;
+	string blabla, blabla1,blabla2;
+	int n;
+	//Receive a reply from the server
 	n=recv(sock , buffer , sizeof(buffer) , 0);
-    if( n < 0)
-    {
-        puts("recv failed");
-    }
+	if( n < 0)
+	{
+		puts("recv_failed");
+		receive(1024);
+	}
 
-		for(int i=0;i<1000;i++){
-		
-			cout<<buffer[i];
-			//blabla+=buffer[i];
-		}
-/**
-      	tcp=tcp+(n/1500)+1; 
-    printf("[TCP]  %d Bytes empfangen -> %d Pakete\n\n", n, tcp); 
-**/
+	for(int i=0;i<100;i++){
+	cout<<buffer[i];
+	}
 
     reply = buffer;
+
+	for(int i=0;i<100;i++){
+	buffer[i]=0;
+	}
+
     return reply;
 }
  
 int main(int argc , char *argv[])
 {
-    tcp_client c;
-    string host="192.168.10.106";
-     
-    cout<<"Enter hostname : ";
-    //cin>>host;
-     
-    //connect to host
-    c.conn(host , 4000);
+	tcp_client c;
+	string host="192.168.10.106";
+
+	cout<<"Enter hostname : ";
+	//cin>>host;
+
+	//connect to host
+	c.conn(host , 4000);
+
+	//send some data
+	c.send_data("Hallo Welt!!");
+	while(1){
+
+		//receive and echo reply
+		cout<<"----------------------------\n\n";
+		c.receive(1024);
+		//cout<<c.receive(1024);
+		cout<<"\n\n----------------------------\n\n";
+		sleep(1);
+	}
 
 
-     while(1){
-	    //send some data
-	    c.send_data("Hallo Welt!!");
-	     
-	    //receive and echo reply
-	    cout<<"----------------------------\n\n";
-	    cout<<c.receive(1024);
-	    cout<<"\n\n----------------------------\n\n";
-     }
     //done
     return 0;
 }
