@@ -144,7 +144,10 @@ bool tcp_client::send_data(string data)
 */
 string tcp_client::receive(int size=512)
 {
-	//char buffer[size];
+
+  cout<<"tcp_client::receive()";
+
+  //char buffer[size];
 	string reply;
 	string blabla, blabla1,blabla2;
 	int n;
@@ -162,17 +165,13 @@ string tcp_client::receive(int size=512)
 
     reply = buffer;
 
-	for(int i=0;i<100;i++){
-	buffer[i]=0;
-	}
-
     return reply;
 }
  
 int main(int argc , char *argv[])
 {
 	tcp_client c;
-	string host="192.168.10.106";
+	string host="localhost";
 
 	cout<<"Enter hostname : ";
 	//cin>>host;
