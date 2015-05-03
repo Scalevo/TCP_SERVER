@@ -293,56 +293,24 @@ string console,s;
 
 
 while(1){
-s="";
-    //receive and echo reply
-    cout<<"----------------------------\n\n";
+  s="";
+  //receive and echo reply
+  cout<<"----------------------------\n\n";
 
-	console=c.receive(1024);
-    
-
-
-cout<< console << "\n";
-
-//s=console;
-
-/**
-pos = 0;
-pos2 = 0;
-count=0;
-header="";
-parameter_x="";
+  console=c.receive(1024);
 
 
 
-    //here the string will be separeted into 2 parts
-    //1. # Bytes and MSG Code
-
-    while ((pos = s.find(delimiter)) != std::string::npos) {
-    header = s.substr(0, pos);
-    std::cout << " message header: " << header << std::endl;
-    //std::cout << " s zum ersten: " << s << std::endl;
-    s.erase(0, pos + delimiter.length());
-    }
+  cout<< console << "\n";
 
 
-    std::cout << " alle_parameter: " << s << std::endl;
-    //2. parametes divided by comma
-    while ((pos2 = s.find(delimiter2)) != std::string::npos) {
-    //count++;
-    parameter_x = s.substr(0, pos2);
-    imu_values[count]=atof (parameter_x.c_str());
-    std::cout << " parameter_" << count++ << " " << parameter_x << std::endl;
-    //std::cout << " s zum zweiten: " << s << std::endl;
-    s.erase(0, pos2 + delimiter2.length());
-    }
-    std::cout << " parameter_" << count << " " << s << std::endl;
-**/
 
-    	cout<<"\n\n----------------------------\n\n";
-	cout<<"sleep(1)"<<"\n";
-	time_t t = time(0);  // t is an integer type
-	cout << t << " seconds since 01-Jan-1970\n";
-	sleep(1);
+
+    cout<<"\n\n----------------------------\n\n";
+  cout<<"sleep(1)"<<"\n";
+  time_t t = time(0);  // t is an integer type
+  cout << t << " seconds since 01-Jan-1970\n";
+  sleep(1);
 	}
 
 

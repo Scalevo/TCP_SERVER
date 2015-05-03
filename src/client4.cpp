@@ -188,7 +188,7 @@ int main(int argc , char *argv[])
 		c.receive(1024);
 		//cout<<c.receive(1024);
 		cout<<"\n\n----------------------------\n\n";
-		sleep(1);
+		sleep(0.001);
 	}
 
 

@@ -1,14 +1,15 @@
 /**
     C++ client example using sockets
 */
-#include<iostream>    //cout
-#include<stdio.h> //printf
-#include<string.h>    //strlen
-#include<string>  //string
-#include<sys/socket.h>    //socket
-#include<arpa/inet.h> //inet_addr
-#include<netdb.h> //hostent
- 
+#include<iostream>  //cout
+#include<stdio.h>   //printf
+#include<string.h>  //strlen
+#include<string>    //string
+#include<sys/socket.h>  //socket
+#include<arpa/inet.h>   //inet_addr
+#include<netdb.h>   //hostent
+#include <sstream>
+
 
 #include <signal.h> //crtl+c
 
@@ -26,8 +27,6 @@
 
 
 using namespace std;
- 
-	char buffer[512];
 
 /**
     TCP Client class
@@ -39,21 +38,21 @@ private:
     std::string address;
     int port;
     struct sockaddr_in server;
-     
+
 public:
     tcp_client();
     bool conn(string, int);
     bool send_data(string data);
     string receive(int);
 };
- 
+
 tcp_client::tcp_client()
 {
     sock = -1;
     port = 0;
     address = "";
 }
- 
+
 /**
     Connect to a host on a certain port number
 */
@@ -68,61 +67,61 @@ bool tcp_client::conn(string address , int port)
         {
             perror("Could not create socket");
         }
-         
+
         cout<<"Socket created\n";
     }
     else    {   /* OK , nothing */  }
-     
+
     //setup address structure
     if(inet_addr(address.c_str()) == -1)
     {
         struct hostent *he;
         struct in_addr **addr_list;
-         
+
         //resolve the hostname, its not an ip address
         if ( (he = gethostbyname( address.c_str() ) ) == NULL)
         {
             //gethostbyname failed
             herror("gethostbyname");
             cout<<"Failed to resolve hostname\n";
-             
+
             return false;
         }
-         
+
         //Cast the h_addr_list to in_addr , since h_addr_list also has the ip address in long format only
         addr_list = (struct in_addr **) he->h_addr_list;
- 
+
         for(int i = 0; addr_list[i] != NULL; i++)
         {
             //strcpy(ip , inet_ntoa(*addr_list[i]) );
             server.sin_addr = *addr_list[i];
-             
+
             cout<<address<<" resolved to "<<inet_ntoa(*addr_list[i])<<endl;
-             
+
             break;
         }
     }
-     
+
     //plain ip address
     else
     {
         server.sin_addr.s_addr = inet_addr( address.c_str() );
     }
-     
+
     server.sin_family = AF_INET;
     server.sin_port = htons( port );
-     
+
     //Connect to remote server
     if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0)
     {
         perror("connect failed. Error");
         return 1;
     }
-     
+
     cout<<"Connected\n";
     return true;
 }
- 
+
 /**
     Send data to the connected host
 */
@@ -135,61 +134,82 @@ bool tcp_client::send_data(string data)
         return false;
     }
     cout<<"Data send\n";
-     
+
     return true;
 }
- 
+
 /**
     Receive data from the connected host
 */
 string tcp_client::receive(int size=512)
 {
+    char buffer[size];
+    string reply;
 
-  cout<<"tcp_client::receive()";
+    int length=512;
+    char bytes[4];
+    //unsigned long n = 175;
+     bytes[0] = (length >> 24) & 0xFF;
+     bytes[1] = (length >> 16) & 0xFF;
+     bytes[2] = (length >> 8) & 0xFF;
+     bytes[3] = length & 0xFF;
 
-  //char buffer[size];
-	string reply;
-	string blabla, blabla1,blabla2;
-	int n;
-	//Receive a reply from the server
-	n=recv(sock , buffer , sizeof(buffer) , 0);
-	if( n < 0)
-	{
-		puts("recv_failed");
-		receive(1024);
-	}
+    char str[512+4];
 
-	for(int i=0;i<100;i++){
-	cout<<buffer[i];
-	}
+    strcpy( str, bytes );
+//    strcat( str, buffer.c_str() );
 
+    //Receive a reply from the server
+    if( recv(sock , buffer , sizeof(buffer) , 0) < 0)
+    {
+        puts("recv failed");
+    }
+    cout<<"hier kommt der buffer\n\n";
+    for(int i=0;i<100;i++)
+    {
+      cout<<buffer[i];
+    }
+    cout<<"\n\nhier war der buffer\n\n";
     reply = buffer;
-
     return reply;
 }
- 
+
 int main(int argc , char *argv[])
 {
-	tcp_client c;
-	string host="192.168.10.106";
+    tcp_client c;
+    string host="localhost";
 
-	cout<<"Enter hostname : ";
-	//cin>>host;
+    //connect to host
+    c.conn(host , 4000);
+    int count=0;
 
-	//connect to host
-	c.conn(host , 4000);
+    while(1){
+      cout<<"--------------du bist am anfang--------------\n\n";
+      cout<<"\n\n";
 
-	//send some data
-	c.send_data("Hallo Welt!!");
-	while(1){
+      //send some data
+      stringstream ss;
+      ss << count;
+      string str = ss.str();
+      count++;
 
-		//receive and echo reply
-		cout<<"----------------------------\n\n";
-		c.receive(1024);
-		//cout<<c.receive(1024);
-		cout<<"\n\n----------------------------\n\n";
-		sleep(1);
-	}
+      string blabla="blablabla "+ str;
+      c.send_data(blabla);
+      cout<<"\n\n";
+
+      //c.send_data(c.receive(1024));
+
+      //receive and echo reply
+      cout<<"----------------------------\n\n";
+      cout<<c.receive(1024);
+      cout<<"\n\n----------------------------\n\n";
+
+      cout<<"\n\n";
+
+      cout<<"--------------du bist am schluss--------------\n\n";
+      sleep(1);
+    }
+
 
 
     //done

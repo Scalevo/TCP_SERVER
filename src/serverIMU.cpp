@@ -77,7 +77,7 @@ static void echo(int client_socket)
 
     std::string s = echo_buffer;
     std::cout << " parameter vom myRIO" << " " << s << std::endl;
-
+    /**
     std::string delimiter = ":";
     std::string delimiter2 = ",";
     size_t pos = 0;
@@ -108,38 +108,9 @@ static void echo(int client_socket)
     s.erase(0, pos2 + delimiter2.length());
     }
     std::cout << " parameter_" << count << " " << s << std::endl;
-
-    ros::NodeHandle m;
-    ros::Publisher chatter_pub_imu = m.advertise<sensor_msgs::Imu>("serverIMU", 1000);
-
-    sensor_msgs::Imu msgImu;
-    float Zahl = rand()*M_PI;
-    msgImu.header.stamp = ros::Time::now();
-    //msgImu.orientation_covariance[0]=Zahl;
-
-    msgImu.header.frame_id="IMU";
+**/
 
 
-
-    //die sind noch nicth implementiert *****
-    msgImu.orientation.x=imu_values[1];
-    msgImu.orientation.y=imu_values[1];
-    msgImu.orientation.z=imu_values[1];
-    msgImu.orientation.w=imu_values[1];
-
-    //die sind jetzt richtig in m/s²
-    msgImu.linear_acceleration.x=imu_values[3];
-    msgImu.linear_acceleration.y=imu_values[4];
-    msgImu.linear_acceleration.z=imu_values[5];
-
-    //die sind jetzt richtig in rad/s
-    msgImu.angular_velocity.x =imu_values[6];
-    msgImu.angular_velocity.y=imu_values[7];
-    msgImu.angular_velocity.z=imu_values[8];
-
-
-    std::cout << msgImu;
-    chatter_pub_imu.publish(msgImu);
 
 }
 

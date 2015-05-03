@@ -168,9 +168,6 @@ add_executable(serverIMU src/serverIMU.cpp)
 target_link_libraries(serverIMU ${catkin_LIBRARIES})
 add_dependencies(serverIMU tcp_server_generate_messages_cpp)
 
-add_executable(serverEncoder src/serverEncoder.cpp)
-target_link_libraries(serverEncoder ${catkin_LIBRARIES})
-add_dependencies(serverEncoder tcp_server_generate_messages_cpp)
 
 #############
 ## Testing ##
@@ -211,6 +208,9 @@ add_executable(client2 src/client2.cpp)
 target_link_libraries(client2 ${catkin_LIBRARIES})
 add_dependencies(client2 lasertech_generate_messages_cpp)
 
+add_executable(client5 src/client5.cpp)
+target_link_libraries(client5 ${catkin_LIBRARIES})
+add_dependencies(client5 lasertech_generate_messages_cpp)
 
 
 
