@@ -10,30 +10,23 @@
 #include<netdb.h>   //hostent
 #include <sstream>
 
-
 #include <signal.h> //crtl+c
-
 #include <stdlib.h>
-#include <stdio.h>
+#include <unistd.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdio.h>
-
-
-  #include <unistd.h>
-
-#include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-
-//#include"conio.h"
-#include"stdio.h"
-#include"string.h"
 #include"math.h"
+#include "ros/ros.h"
+
+#include "ros/ros.h"
+#include "std_msgs/String.h"
 
 
 using namespace std;
+
+string new_msg;
+string old_msg;
 
 /**
     TCP Client class
@@ -150,40 +143,7 @@ bool tcp_client::send_data(string data)
   memcpy( str, bytes, 4 );
   memcpy( &str[4], data.c_str(), length );
 
-/**
-  cout <<"das ist length: "<<length<<"\n\n";
-
-  int size =strlen(data.c_str());
-  cout <<"das ist size: "<<size<<"\n\n";
-  char buffer[size+1];
-
-  buffer[0]=(int)size;
-  cout <<"das ist  buffer[0]: "<<buffer[0]<<"\n\n";
-
-  int how_big[4];
-  int how_big2=0;
-
-
-  for(int ii=0;ii<4;ii++)
-  {
-    cout <<"das ist str: "<<(int)str[ii]<<"\n\n";
-
-  }
-
-
-/**
-for(int ii=0;ii<4;ii++)
-{
-  cout<<(int)buffer[ii]<<" ";
-  how_big[ii]=(int)buffer[ii];
-  how_big2=how_big[ii];
-
-  //std::cout << std::dec<< how_big[ii] << '\n';
-}
-**/
-
     //Send some data
-    //if( send(sock , data.c_str() , strlen( data.c_str() ) , 0) < 0)
     if( send(sock , str , length+4 , 0) < 0)
     {
         perror("Send failed : ");
@@ -201,12 +161,9 @@ string tcp_client::receive_bytes(int size=512)
 {
     char buffer[size+1];
     string reply;
-    char array[1024]="";
     int how_big[4];
     int how_big2=0;
 
-
-    //sizeof(buffer)--> 1024
     //Receive a reply from the server
     if( recv(sock , buffer , sizeof(buffer) , 0) < 0)
     {
@@ -226,8 +183,6 @@ string tcp_client::receive_bytes(int size=512)
     }
 
     cout<<"\n";
-    cout<<"grösse: "<<how_big2<<"\n";
-
 
     cout<<"Data recv:string  ";
     for(int i=4;i<how_big2+4;i++)
@@ -236,14 +191,17 @@ string tcp_client::receive_bytes(int size=512)
     }
     cout<<"\n";
 
-
-    //reply=receive_string(s);
-    //int s = *(int*)&buffer[0];
     //reply = buffer;
     return reply;
 }
 
-int main(int argc , char *argv[])
+void chatterCallback(const std_msgs::String::ConstPtr& msg)
+{
+  ROS_INFO("I heard: [%s]", msg->data.c_str());
+}
+
+
+int main(int argc, char **argv)
 {
     tcp_client c;
     string host="192.168.10.100";
@@ -253,21 +211,28 @@ int main(int argc , char *argv[])
     c.conn(host , 4000);
     int count=0;
 
-    while(1){
-      cout<<"\n\n";
+
+    ros::init(argc, argv, "tcp_client");
+
+    ros::NodeHandle nodeHandle;
+
+    ros::Subscriber sub_cmd = nodeHandle.subscribe("scalevo_pos", 1000, chatterCallback);
+
+    while(){
       cout<<"\n\n";
       cout<<"--------------du bist am Anfang--------------\n";
-
-      //send some data
+      /**
       stringstream ss;
       ss << count;
       string str = ss.str();
       count++;
       cout<<"----------------------------\n";
-      string blabla="DATA:beta,87.2154";//+ str;
-      c.send_data(blabla);
+      string blabla="DATA:beta,87.2154";
+      **/
 
-      //c.send_data(c.receive(1024));
+
+      //send some data
+      c.send_data("Data to be send");
 
       //receive and echo reply
       cout<<"----------------------------\n";
@@ -277,6 +242,8 @@ int main(int argc , char *argv[])
       cout<<"--------------du bist am schluss--------------\n";
       sleep(0.1);
     }
+
+      ros::spin();
 
 
     //done
