@@ -225,8 +225,6 @@ string tcp_client::receive_bytes(int size=512)
       //std::cout << std::dec<< how_big[ii] << '\n';
     }
 
-
-
     cout<<"\n";
     cout<<"grösse: "<<how_big2<<"\n";
 
@@ -244,7 +242,6 @@ string tcp_client::receive_bytes(int size=512)
     //reply = buffer;
     return reply;
 }
-
 
 int main(int argc , char *argv[])
 {

@@ -164,9 +164,9 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
-add_executable(serverIMU src/serverIMU.cpp)
-target_link_libraries(serverIMU ${catkin_LIBRARIES})
-add_dependencies(serverIMU tcp_server_generate_messages_cpp)
+add_executable(tcp_client src/tcp_client.cpp)
+target_link_libraries(tcp_client ${catkin_LIBRARIES})
+add_dependencies(tcp_client tcp_server_generate_messages_cpp)
 
 
 #############
@@ -181,38 +181,4 @@ add_dependencies(serverIMU tcp_server_generate_messages_cpp)
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-
-add_executable(client3 src/client3.cpp)
-target_link_libraries(client3 ${catkin_LIBRARIES})
-add_dependencies(client3 tcp_server_generate_messages_cpp)
-
-add_executable(client4 src/client4.cpp)
-target_link_libraries(client4 ${catkin_LIBRARIES})
-add_dependencies(client4 tcp_server_generate_messages_cpp)
-
-
-#add_executable(server src/server.cpp)
-#target_link_libraries(server ${catkin_LIBRARIES})
-#add_dependencies(server lasertech_generate_messages_cpp)
-
-#add_executable(client src/client.cpp)
-#target_link_libraries(client ${catkin_LIBRARIES})
-#add_dependencies(client lasertech_generate_messages_cpp)
-
-#add_executable(server2 src/server2.cpp)
-#target_link_libraries(server2 ${catkin_LIBRARIES})
-#add_dependencies(server2 lasertech_generate_messages_cpp)
-
-add_executable(client2 src/client2.cpp)
-target_link_libraries(client2 ${catkin_LIBRARIES})
-add_dependencies(client2 lasertech_generate_messages_cpp)
-
-add_executable(client5 src/client5.cpp)
-target_link_libraries(client5 ${catkin_LIBRARIES})
-add_dependencies(client5 lasertech_generate_messages_cpp)
-
-
-
-
 
