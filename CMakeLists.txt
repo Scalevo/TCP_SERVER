@@ -68,10 +68,10 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-   DEPENDENCIES
-   std_msgs
-)
+##generate_messages(
+##   DEPENDENCIES
+#   std_msgs
+#)
 
 ###################################
 ## catkin specific configuration ##
@@ -91,7 +91,7 @@ generate_messages(
 
 
 catkin_package(
-	INCLUDE_DIRS include
+#	INCLUDE_DIRS include
 #  LIBRARIES lasertech
     CATKIN_DEPENDS sensor_msgs
 #  DEPENDS system_lib
@@ -164,10 +164,9 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
-add_executable(tcp_client src/tcp_client.cpp)
+add_executable(tcp_client src/tcp_client_new.cpp)
 target_link_libraries(tcp_client ${catkin_LIBRARIES})
 add_dependencies(tcp_client tcp_server_generate_messages_cpp)
-
 
 #############
 ## Testing ##
