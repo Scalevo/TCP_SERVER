@@ -18,12 +18,19 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdio.h>
+
 
   #include <unistd.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+
+//#include"conio.h"
+#include"stdio.h"
+#include"string.h"
+#include"math.h"
 
 
 using namespace std;
@@ -43,7 +50,9 @@ public:
     tcp_client();
     bool conn(string, int);
     bool send_data(string data);
-    string receive(int);
+    string receive_bytes(int);
+    string receive_string(int);
+
 };
 
 tcp_client::tcp_client()
@@ -128,29 +137,59 @@ bool tcp_client::conn(string address , int port)
 bool tcp_client::send_data(string data)
 {
 
-int length=data.length();
-char bytes[4];
-//unsigned long n = 175;
- bytes[0] = (length >> 24) & 0xFF;
- bytes[1] = (length >> 16) & 0xFF;
- bytes[2] = (length >> 8) & 0xFF;
- bytes[3] = length & 0xFF;
+  int length=data.length();
+  char bytes[5];
+  //unsigned long n = 175;
+   bytes[0] = (length >> 24) & 0xFF;
+   bytes[1] = (length >> 16) & 0xFF;
+   bytes[2] = (length >> 8) & 0xFF;
+   bytes[3] = length & 0xFF;
+   bytes[4] = 0;
+  char str[length+5];
 
-char str[data.length()+4];
+  memcpy( str, bytes, 4 );
+  memcpy( &str[4], data.c_str(), length );
 
-strcpy( str, bytes );
-strcat( str, data.c_str() );
+/**
+  cout <<"das ist length: "<<length<<"\n\n";
+
+  int size =strlen(data.c_str());
+  cout <<"das ist size: "<<size<<"\n\n";
+  char buffer[size+1];
+
+  buffer[0]=(int)size;
+  cout <<"das ist  buffer[0]: "<<buffer[0]<<"\n\n";
+
+  int how_big[4];
+  int how_big2=0;
 
 
+  for(int ii=0;ii<4;ii++)
+  {
+    cout <<"das ist str: "<<(int)str[ii]<<"\n\n";
+
+  }
+
+
+/**
+for(int ii=0;ii<4;ii++)
+{
+  cout<<(int)buffer[ii]<<" ";
+  how_big[ii]=(int)buffer[ii];
+  how_big2=how_big[ii];
+
+  //std::cout << std::dec<< how_big[ii] << '\n';
+}
+**/
 
     //Send some data
     //if( send(sock , data.c_str() , strlen( data.c_str() ) , 0) < 0)
-    if( send(sock , str , strlen( data.c_str() ) , 0) < 0)
+    if( send(sock , str , length+4 , 0) < 0)
     {
         perror("Send failed : ");
         return false;
     }
-    cout<<"Data send: "<<data<<"\n";
+    cout<<"Data send: "<<str<<"\n";
 
     return true;
 }
@@ -158,39 +197,60 @@ strcat( str, data.c_str() );
 /**
     Receive data from the connected host
 */
-string tcp_client::receive(int size=512)
+string tcp_client::receive_bytes(int size=512)
 {
-    char buffer[size];
+    char buffer[size+1];
     string reply;
-	char array[1024]="";
-    
+    char array[1024]="";
+    int how_big[4];
+    int how_big2=0;
 
 
-	//sizeof(buffer)--> 1024
+    //sizeof(buffer)--> 1024
     //Receive a reply from the server
     if( recv(sock , buffer , sizeof(buffer) , 0) < 0)
     {
         puts("recv failed");
     }
+    buffer[size] = 0;
 
 
-cout<<"Data recv:  ";
-    for(int i=0;i<14;i++)
+    cout<<"Data recv:bytes  ";
+    for(int ii=0;ii<4;ii++)
     {
-      cout<<buffer[i];
-	array[i]=buffer[i];
+      cout<<(int)buffer[ii]<<" ";
+      how_big[ii]=(int)buffer[ii];
+      how_big2=how_big[ii];
+
+      //std::cout << std::dec<< how_big[ii] << '\n';
     }
 
-cout<<"\n";
-//cout<<array;
-    reply = buffer;
+
+
+    cout<<"\n";
+    cout<<"grösse: "<<how_big2<<"\n";
+
+
+    cout<<"Data recv:string  ";
+    for(int i=4;i<how_big2+4;i++)
+    {
+      cout<<buffer[i];
+    }
+    cout<<"\n";
+
+
+    //reply=receive_string(s);
+    //int s = *(int*)&buffer[0];
+    //reply = buffer;
     return reply;
 }
+
 
 int main(int argc , char *argv[])
 {
     tcp_client c;
-    string host="10.0.1.22";
+    string host="192.168.10.100";
+    //string host="localhost";
 
     //connect to host
     c.conn(host , 4000);
@@ -198,8 +258,8 @@ int main(int argc , char *argv[])
 
     while(1){
       cout<<"\n\n";
-      cout<<"\n\n";	
-      cout<<"--------------du bist am anfang--------------\n";
+      cout<<"\n\n";
+      cout<<"--------------du bist am Anfang--------------\n";
 
       //send some data
       stringstream ss;
@@ -207,20 +267,19 @@ int main(int argc , char *argv[])
       string str = ss.str();
       count++;
       cout<<"----------------------------\n";
-      string blabla="blablabla "+ str;
+      string blabla="DATA:beta,87.2154";//+ str;
       c.send_data(blabla);
 
       //c.send_data(c.receive(1024));
 
       //receive and echo reply
       cout<<"----------------------------\n";
-      cout<<c.receive(1024);
+      cout<<c.receive_bytes(1024);
       cout<<"----------------------------\n";
 
       cout<<"--------------du bist am schluss--------------\n";
       sleep(0.1);
     }
-
 
 
     //done

@@ -163,7 +163,7 @@ string tcp_client::receive(int size=512)
     char buffer[size];
     string reply;
 	char array[1024]="";
-    
+
 
 
 	//sizeof(buffer)--> 1024
@@ -198,7 +198,7 @@ int main(int argc , char *argv[])
 
     while(1){
       cout<<"\n\n";
-      cout<<"\n\n";	
+      cout<<"\n\n";
       cout<<"--------------du bist am anfang--------------\n";
 
       //send some data
@@ -218,7 +218,7 @@ int main(int argc , char *argv[])
       cout<<"----------------------------\n";
 
       cout<<"--------------du bist am schluss--------------\n";
-      sleep(1);
+      sleep(0.01);
     }
 
 
