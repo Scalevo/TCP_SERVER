@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tcp_server)
 
+set(CMAKE_CXX_FLAGS "--std=c++11")
+
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -164,7 +167,7 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
-add_executable(tcp_client src/tcp_client_new.cpp)
+add_executable(tcp_client src/tcp_client.cpp)
 target_link_libraries(tcp_client ${catkin_LIBRARIES})
 add_dependencies(tcp_client tcp_server_generate_messages_cpp)
 
