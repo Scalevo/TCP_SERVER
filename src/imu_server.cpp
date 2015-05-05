@@ -57,17 +57,20 @@ int main(int argc , char  **argv)
       float x_angle_ori=values[1];
       float y_angle_ori=values[0];
       float z_angle_ori=-values[2];
-      Eigen::Vector3d angle_ori(x_angle_ori,x_angle_ori,x_angle_ori);
-
+      Eigen::Vector3d angle_ori_vec(x_angle_ori,x_angle_ori,x_angle_ori);
 
       float x_accel=values[4];
       float y_accel=values[3];
       float z_accel=-values[5];
+	  Eigen::Vector3d accel_vec(x_accel,y_accel,z_accel);
+
 
       float x_angle_vel=values[7];
       float y_angle_vel=values[6];
       float z_angle_vel=-values[8];
-      //conversion from angle to unit vector
+		Eigen::Vector3d angle_vel_vec(x_angle_vel,y_angle_vel,z_angle_vel);
+
+	  /**
       float Ax[3][3] =
       {
         {  1,  0,  0 },
@@ -89,29 +92,45 @@ int main(int argc , char  **argv)
         {  -sin(z_angle_ori), cos(z_angle_ori), 0 },
         { 0, 0, 1 }
       };
+**/
+      
+	  //conversion from angle to unit vector
+      Eigen::Matrix3d Axx(3,3);
+      Axx << 
+		1,  0,  0 ,
+		0, cos(x_angle_ori), sin(x_angle_ori) ,
+		0, -sin(x_angle_ori), cos(x_angle_ori);
 
+      std::cout << Axx << std::endl;
 
-      Eigen::Matrix3d Ax(3,3);
-      Ax << 1,  0,  0 ,
-        0, cos(x_angle_ori), sin(x_angle_ori) ,
-       0, -sin(x_angle_ori), cos(x_angle_ori);
-      std::cout << Ax << std::endl;
+      Eigen::Matrix3d Ayy(3,3);
+      Ayy <<
+        cos(y_angle_ori),  0,  -sin(y_angle_ori) ,
+        0, 1, 0 ,
+        sin(y_angle_ori), 0, cos(y_angle_ori) ;
+		
+      std::cout << Ayy << std::endl;
 
+      Eigen::Matrix3d Azz(3,3);
+      Azz << 
+		cos(z_angle_ori),  sin(z_angle_ori),  0 ,
+		-sin(z_angle_ori), cos(z_angle_ori), 0 ,
+		0, 0, 1 ;
+      std::cout << Azz << std::endl;
 
-      Eigen::Matrix3d Ay(3,3);
-      Ay << 1,  0,  0 ,
-        0, cos(x_angle_ori), sin(x_angle_ori) ,
-       0, -sin(x_angle_ori), cos(x_angle_ori);
-      std::cout << Ax << std::endl;
+	  Eigen::Vector3d orientation_vec;
+	orientation_vec<<Azz*Ayy*Axx*angle_ori_vec;
+	
+		  Eigen::Vector3d angular_velocity_vec;
+	angular_velocity_vec<<Azz*Ayy*Axx*accel_vec;
+	
+		  Eigen::Vector3d linear_acceleration_vec;
+	linear_acceleration_vec<<Azz*Ayy*Axx*angle_vel_vec;
+	
+	      std::cout << "p*r:\n" << orientation_vec << std::endl;
+      std::cout << "p*r:\n" << orientation_vec << std::endl;
 
-
-      Eigen::Matrix3d Az(3,3);
-      Azz << 1,  0,  0 ,
-        0, cos(x_angle_ori), sin(x_angle_ori) ,
-       0, -sin(x_angle_ori), cos(x_angle_ori);
-      std::cout << Ax << std::endl;
-
-      std::cout << "p*r:\n" << Azz*angle_ori << std::endl;
+      std::cout << "p*r:\n" << orientation_vec << std::endl;
 
 
       float UV_angle_ori [3];
@@ -120,13 +139,23 @@ int main(int argc , char  **argv)
 
       msg.header.stamp = ros::Time::now();
       msg.header.frame_id="IMU_frame";
-      msg.orientation.x=values[0];
-      msg.orientation.y=values[1];
-      msg.orientation.z=values[2];
-      msg.orientation.w=values[3];
+	  
+      msg.orientation.x=orientation_vec[0];
+      msg.orientation.y=orientation_vec[1];
+      msg.orientation.z=orientation_vec[2];
+      msg.orientation.w=1;
+	  
+	  msg.angular_velocity.x=values[4];
+	  msg.angular_velocity.y=values[4];
+	  msg.angular_velocity.z=values[4];
+
+	  
+	  
       msg.linear_acceleration.x=values[4];
       msg.linear_acceleration.y=values[5];
       msg.linear_acceleration.z=values[6];
+	  
+	  
 
       cout<<msg<<"\n";
 
