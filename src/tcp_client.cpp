@@ -107,10 +107,10 @@ tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg
     while(ros::ok())
     {
       //parser("IMU:198,132,3123,23,1498,12348,666");
-      ROS_INFO("BLABLABLAB %d",count);
+      //ROS_INFO("BLABLABLAB %d",count);
         std::string test;
       test = receive_bytes(1024);
-        std::cout << test << std::endl;
+        //std::cout << test << std::endl;
       parser(test);
 
       ros::spinOnce();
@@ -125,45 +125,91 @@ void tcp_client::parser(std::string s) {
 
     values.clear();
 
+    //ROS_INFO("vector cleaned");
+
     std::string delimiter = ":";
     std::string delimiter2 = ",";
     size_t pos = 0;
     size_t pos2 = 0;
     int count=0;
     std::string header;
+    std::string header2;
+
     std::string parameter_x;
-    double imu_values[9];
+    float values_parameter[12];
+
 
     while ((pos = s.find(delimiter)) != std::string::npos)
     {
     header = s.substr(0, pos);
-    std::cout << " message header: " << header << std::endl;
+    ROS_INFO("header1: %s",header.c_str());
+    //std::cout << " message header: " << header << std::endl;
     //std::cout << " s zum ersten: " << s << std::endl;
     s.erase(0, pos + delimiter.length());
     }
-    
 
-    if (header==topic) 
+    if(header=="DATA"){
+      //cout <<"blablabla\n";
+      pos = s.find(delimiter2);
+      header2 = s.substr(0, pos);
+      ROS_INFO("header2: %s",header2.c_str());
+      //std::cout << " message header: " << header << std::endl;
+      //std::cout << " s zum ersten: " << s << std::endl;
+      s.erase(0, pos + delimiter2.length());
+    }
+
+    //ROS_INFO("here core dumped");
+    //ROS_INFO("topic: %s",topic.c_str());
+
+    //FIXME sometimes "Segmentation fault (core dumped)" an dieser Stelle
+    //FIXME topic hat leerschlag davor, wieso??...
+    std::string _topic=" "+topic;
+    //cout <<"_topic"<<_topic<<"\n";
+    //cout <<"header2"<<header2<<"\n";
+
+
+    if (header2== _topic )
     {
+      //ROS_INFO("topic: %s",topic.c_str());
+
     while ((pos2 = s.find(delimiter2)) != std::string::npos)
     {
-    //count++;
     parameter_x = s.substr(0, pos2);
+    //std::cout << " parameter_: " <<count<<" :"<< parameter_x << std::endl;
+
+    values_parameter[count]=atof (parameter_x.c_str());
     values.push_back(atof (parameter_x.c_str()));
-    ROS_INFO("value: %f",values[count]);
+    ROS_INFO("value_%i: %f",count,values[count]);
     count++;
     //std::cout << " s zum zweiten: " << s << std::endl;
     s.erase(0, pos2 + delimiter2.length());
     }
+    parameter_x = s.substr(0, pos2);
 
+    values_parameter[count]=atof (parameter_x.c_str());
     values.push_back(atof (parameter_x.c_str()));
-    ROS_INFO("value: %f",values[count]);
+
+    ROS_INFO("value_%i: %f",count,values[count]);
     ROS_INFO("VECTOR SIZE: %zu ",values.size());
     }
 
-    if(msg_type_== "IMU")
+    /**else if (header2=="CMD")
     {
-      pub = n_.advertise<sensor_msgs::Imu>(topic,1);
+
+    }else if (header2=="CMD")
+    {
+
+    }else
+    {
+      ROS_ERROR("NO MESSAGE HEADER RECOGNIZED");
+    }
+**/
+
+    if(msg_type_== "IMU" && header2=="IMU")
+    {
+      ROS_INFO("ich bin drin: %s",msg_type_.c_str());
+
+      pub = n_.advertise<sensor_msgs::Imu>(topic,5);
       sensor_msgs::Imu msg;
 
       //wrong coordinate systems: correction
@@ -171,6 +217,7 @@ void tcp_client::parser(std::string s) {
       float x_angle_ori=values[1];
       float y_angle_ori=values[0];
       float z_angle_ori=-values[2];
+      //cout <<"msg : "<<"blabla"<<"\n";
 
       float x_accel=values[4];
       float y_accel=values[3];
@@ -179,22 +226,15 @@ void tcp_client::parser(std::string s) {
       float x_angle_vel=values[7];
       float y_angle_vel=values[6];
       float z_angle_vel=-values[8];
-
       //conversion from angle to unit vector
+
+      /**
       float Ax[3][3] =
       {
         {  1,  0,  0 },
         {  0, cos(x_angle_ori), sin(x_angle_ori) },
         { 0, -sin(x_angle_ori), cos(x_angle_ori) }
       };
-
-      Eigen::MatrixXd m(3,3);
-      m << 1,  0,  0 ,
-        0, cos(x_angle_ori), sin(x_angle_ori) ,
-       0, -sin(x_angle_ori), cos(x_angle_ori);
-
-      std::cout << m << std::endl;
-
 
       float Ay[3][3] =
       {
@@ -210,40 +250,44 @@ void tcp_client::parser(std::string s) {
         {  -sin(z_angle_ori), cos(z_angle_ori), 0 },
         { 0, 0, 1 }
       };
-
-      float UV_angle_ori [3];
-      //multiply[][];
-
+**/
 
       msg.header.stamp = ros::Time::now();
-      msg.header.frame_id="IMU_frame";
-      msg.orientation.x=values[0];
-      msg.orientation.y=values[1];
-      msg.orientation.z=values[2];
-      msg.orientation.w=values[3];
-      msg.linear_acceleration.x=values[4];
-      msg.linear_acceleration.y=values[5];
-      msg.linear_acceleration.z=values[6];
+      msg.header.frame_id="odom";
 
-      cout<<msg<<"\n";
+      msg.orientation.x=x_angle_ori;
+      msg.orientation.y=y_angle_ori;
+      msg.orientation.z=z_angle_ori;
+      msg.orientation.w=1;
+
+      msg.angular_velocity.x=x_accel;
+      msg.angular_velocity.y=y_accel;
+      msg.angular_velocity.z=z_accel;
+
+      msg.linear_acceleration.x=x_angle_vel;
+      msg.linear_acceleration.y=x_angle_vel;
+      msg.linear_acceleration.z=x_angle_vel;
+
+
+      //cout<<msg<<"\n";
       pub.publish(msg);
     }
     else if(msg_type_== "Float")
     {
-
+      cout<< "bin i msg type float";
     }
     else if(msg_type_==  "FloatArray")
     {
+      cout<< "bin i msg type FloatArray";
 
     }
     else if(msg_type_==  "Encoder")
     {
+      cout<< "bin i msg type Encoder";
+
+      /**
       pub = n_.advertise<tcp_server::ScalevoWheels>(topic,1);
       tcp_server::ScalevoWheels msg;
-
-
-
-
 
       msg.header.stamp = ros::Time::now();
       //msg.header.frame_id="IMU_frame";
@@ -258,6 +302,8 @@ void tcp_client::parser(std::string s) {
 
       cout<<msg<<"\n";
       pub.publish(msg);
+
+      */
     }
     else if(msg_type_== "CMD")
     {
@@ -334,6 +380,7 @@ bool conn(string address , int port)
     {
         perror("connect failed. Error");
         return 1;
+        exit(0);
     }
 
     cout<<"Connected\n";
@@ -347,6 +394,7 @@ bool conn(string address , int port)
 */
 bool tcp_client::send_data(string data)
 {
+    ROS_INFO("msg_send: %s",data.c_str());
 
     int length=data.length();
     char bytes[5];
@@ -367,7 +415,7 @@ bool tcp_client::send_data(string data)
         perror("Send failed : ");
         return false;
     }
-    cout<<"Data send: "<<str<<"\n";
+    //cout<<"Data send: "<<str<<"\n";
 
     return true;
 }
@@ -386,31 +434,36 @@ string tcp_client::receive_bytes(int size=512)
     //Receive a reply from the server
     if( recv(sock_t , buffer , sizeof(buffer) , 0) < 0)
     {
-        puts("recv failed");
+        //puts("recv failed");
+        ROS_ERROR("recv failed!!");
+
     }
     buffer[size] = 0;
 
-    cout<<"Data recv:bytes  ";
+    //cout<<"Data recv:bytes  ";
     for(int ii=0;ii<4;ii++)
     {
-      cout<<(int)buffer[ii]<<" ";
+      //cout<<(int)buffer[ii]<<" ";
       how_big[ii]=(int)buffer[ii];
       how_big2=how_big[ii];
     }
 
-    cout<<"\n";
-    //cout<<"grösse: "<<how_big2<<"\n";
+    //cout<<"\n";
 
 
-    cout<<"Data recv:string  ";
+    //    cout<<"Data recv:string  ";
+
+    /**
     for(int i=4;i<how_big2+4;i++)
     {
       cout<<buffer[i];
     }
-    cout<<"\n";
+    **/
     for (int i=4;i<how_big2+4;i++) {
       reply += buffer[i];
     }
+    cout<<"\n";
+    ROS_INFO("msg_recv: %s",reply.c_str());
 
    return reply;
 }
@@ -420,10 +473,10 @@ int main(int argc , char  **argv)
     ros::init(argc, argv, "tcp_server");
     ros::NodeHandle n;
 
-    string host="192.168.10.105";    //string host="localhost";
+    string host="192.168.10.100";    //string host="localhost";
 
     //connect to host
-    //conn(host , 4000);
+    conn(host , 4000);
 
     //ROS--> MyRIO
     tcp_client beta(1,"/beta",n,"Float");
