@@ -60,6 +60,14 @@ add_message_files(
 
 )
 
+
+# eigen 3
+find_path(EIGEN_INCLUDE_DIR Eigen/Core
+	/usr/local/include/eigen3
+	/usr/include/eigen3
+)
+
+
 ## Generate services in the 'srv' folder
 # add_service_files(
 #   FILES
@@ -174,6 +182,13 @@ include_directories(
 add_executable(tcp_client src/tcp_client.cpp)
 target_link_libraries(tcp_client ${catkin_LIBRARIES})
 add_dependencies(tcp_client tcp_server_generate_messages_cpp)
+
+
+
+add_executable(imu_server src/imu_server.cpp)
+target_link_libraries(imu_server ${catkin_LIBRARIES})
+add_dependencies(imu_server tcp_server_generate_messages_cpp)
+
 
 #############
 ## Testing ##

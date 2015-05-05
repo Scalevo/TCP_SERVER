@@ -10,25 +10,15 @@
 #include<netdb.h>   //hostent
 #include <sstream>
 
-
 #include <signal.h> //crtl+c
-
-#include <stdlib.h>
 #include <stdio.h>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdio.h>
-
 
 #include <unistd.h>
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 
 //#include"conio.h"
-#include"stdio.h"
 #include"string.h"
 #include"math.h"
 
@@ -37,6 +27,11 @@
 #include <ros/ros.h>
 #include "std_msgs/Float32.h"
 #include "sensor_msgs/Imu.h"
+
+#include "tcp_server/ScalevoWheels.h"
+
+//#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 
 using namespace std;
@@ -88,13 +83,6 @@ tcp_client::tcp_client()
   //  address = "";
 }
 
-
-
-
-
-
-
-
 void tcp_client::Callback(const std_msgs::Float32::ConstPtr& msg)
 {
   std::ostringstream buff;
@@ -102,12 +90,6 @@ void tcp_client::Callback(const std_msgs::Float32::ConstPtr& msg)
   std::string data = buff.str();
   send_data(data);
 }
-
-
-
-
-
-
 
 tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg_type): direction(dir), topic(top),n_(n),msg_type_(msg_type)
 {
@@ -120,21 +102,21 @@ tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg
     else if (direction==2) // Get from MyRio
 	{
  
-	int count = 0;
-	 ros::Rate loop_rate(1);
-	    while(ros::ok())
-	    {
-	    //parser("IMU:198,132,3123,23,1498,12348,666");
-	    ROS_INFO("BLABLABLAB %d",count);
-  	    std::string test;
-	    test = receive_bytes(1024);
-   	    std::cout << test << std::endl;
-	    parser(test);
+    int count = 0;
+    ros::Rate loop_rate(1);
+    while(ros::ok())
+    {
+      //parser("IMU:198,132,3123,23,1498,12348,666");
+      ROS_INFO("BLABLABLAB %d",count);
+        std::string test;
+      test = receive_bytes(1024);
+        std::cout << test << std::endl;
+      parser(test);
 
-	    ros::spinOnce();
-	    loop_rate.sleep();
-	    count++;
-	    }
+      ros::spinOnce();
+      loop_rate.sleep();
+      count++;
+	   }
 	} 
 
 }
@@ -179,45 +161,112 @@ void tcp_client::parser(std::string s) {
     ROS_INFO("VECTOR SIZE: %zu ",values.size());
     }
 
-
-
     if(msg_type_== "IMU")
-{
-	pub = n_.advertise<sensor_msgs::Imu>(topic,1);
-	sensor_msgs::Imu msg;
+    {
+      pub = n_.advertise<sensor_msgs::Imu>(topic,1);
+      sensor_msgs::Imu msg;
 
-	msg.header.stamp = ros::Time::now();
-	msg.header.frame_id="IMU_frame";
-	msg.orientation.x=values[0];
-	msg.orientation.y=values[1];
-	msg.orientation.z=values[2];
-	msg.orientation.w=values[3];
-	msg.linear_acceleration.x=values[4];
-	msg.linear_acceleration.y=values[5];
-	msg.linear_acceleration.z=values[6];
+      //wrong coordinate systems: correction
+      //angles not unit vector
+      float x_angle_ori=values[1];
+      float y_angle_ori=values[0];
+      float z_angle_ori=-values[2];
 
- 	pub.publish(msg);    
-}
-	else if(msg_type_== "Float")
-{
-	
-}
-	else if(msg_type_==  "FloatArray")
-{
+      float x_accel=values[4];
+      float y_accel=values[3];
+      float z_accel=-values[5];
 
-}
-	else if(msg_type_==  "Encoder")
-{
+      float x_angle_vel=values[7];
+      float y_angle_vel=values[6];
+      float z_angle_vel=-values[8];
 
-}
-	else if(msg_type_== "CMD")
-{
+      //conversion from angle to unit vector
+      float Ax[3][3] =
+      {
+        {  1,  0,  0 },
+        {  0, cos(x_angle_ori), sin(x_angle_ori) },
+        { 0, -sin(x_angle_ori), cos(x_angle_ori) }
+      };
 
-}
-	else
-{
-  //ROS_WARN("Uncorrect msg_type: %s",msg_type_);
-}
+      Eigen::MatrixXd m(3,3);
+      m << 1,  0,  0 ,
+        0, cos(x_angle_ori), sin(x_angle_ori) ,
+       0, -sin(x_angle_ori), cos(x_angle_ori);
+
+      std::cout << m << std::endl;
+
+
+      float Ay[3][3] =
+      {
+        {  cos(y_angle_ori),  0,  -sin(y_angle_ori) },
+        {  0, 1, 0 },
+        { sin(y_angle_ori), 0, cos(y_angle_ori) }
+      };
+
+      float Az[3][3] =
+
+      {
+        {  cos(z_angle_ori),  sin(z_angle_ori),  0 },
+        {  -sin(z_angle_ori), cos(z_angle_ori), 0 },
+        { 0, 0, 1 }
+      };
+
+      float UV_angle_ori [3];
+      //multiply[][];
+
+
+      msg.header.stamp = ros::Time::now();
+      msg.header.frame_id="IMU_frame";
+      msg.orientation.x=values[0];
+      msg.orientation.y=values[1];
+      msg.orientation.z=values[2];
+      msg.orientation.w=values[3];
+      msg.linear_acceleration.x=values[4];
+      msg.linear_acceleration.y=values[5];
+      msg.linear_acceleration.z=values[6];
+
+      cout<<msg<<"\n";
+      pub.publish(msg);
+    }
+    else if(msg_type_== "Float")
+    {
+
+    }
+    else if(msg_type_==  "FloatArray")
+    {
+
+    }
+    else if(msg_type_==  "Encoder")
+    {
+      pub = n_.advertise<tcp_server::ScalevoWheels>(topic,1);
+      tcp_server::ScalevoWheels msg;
+
+
+
+
+
+      msg.header.stamp = ros::Time::now();
+      //msg.header.frame_id="IMU_frame";
+      msg.travel[0]=values[0];
+      msg.travel[1]=values[1];
+      msg.speed[0]=values[2];
+      msg.speed[1]=values[3];
+      msg.travel_tracks[0]=values[0];
+      msg.travel_tracks[1]=values[1];
+      msg.speed_tracks[0]=values[2];
+      msg.speed_tracks[1]=values[3];
+
+      cout<<msg<<"\n";
+      pub.publish(msg);
+    }
+    else if(msg_type_== "CMD")
+    {
+
+    }
+    else
+    {
+      //ROS_WARN("Uncorrect msg_type: %s",msg_type_);
+    }
 
 }
 
@@ -299,44 +348,20 @@ bool conn(string address , int port)
 bool tcp_client::send_data(string data)
 {
 
-  int length=data.length();
-  char bytes[5];
-  //unsigned long n = 175;
-   bytes[0] = (length >> 24) & 0xFF;
-   bytes[1] = (length >> 16) & 0xFF;
-   bytes[2] = (length >> 8) & 0xFF;
-   bytes[3] = length & 0xFF;
-   bytes[4] = 0;
-  char str[length+5];
+    int length=data.length();
+    char bytes[5];
+    //unsigned long n = 175;
+    bytes[0] = (length >> 24) & 0xFF;
+    bytes[1] = (length >> 16) & 0xFF;
+    bytes[2] = (length >> 8) & 0xFF;
+    bytes[3] = length & 0xFF;
+    bytes[4] = 0;
+    char str[length+5];
 
-  memcpy( str, bytes, 4 );
-  memcpy( &str[4], data.c_str(), length );
-
-/**
-  cout <<"das ist length: "<<length<<"\n\n";
-  int size =strlen(data.c_str());
-  cout <<"das ist size: "<<size<<"\n\n";
-  char buffer[size+1];
-  buffer[0]=(int)size;
-  cout <<"das ist  buffer[0]: "<<buffer[0]<<"\n\n";
-  int how_big[4];
-  int how_big2=0;
-  for(int ii=0;ii<4;ii++)
-  {
-    cout <<"das ist str: "<<(int)str[ii]<<"\n\n";
-  }
-/**
-for(int ii=0;ii<4;ii++)
-{
-  cout<<(int)buffer[ii]<<" ";
-  how_big[ii]=(int)buffer[ii];
-  how_big2=how_big[ii];
-  //std::cout << std::dec<< how_big[ii] << '\n';
-}
-**/
+    memcpy( str, bytes, 4 );
+    memcpy( &str[4], data.c_str(), length );
 
     //Send some data
-    //if( send(sock , data.c_str() , strlen( data.c_str() ) , 0) < 0)
     if( send(sock_t , str , length+4 , 0) < 0)
     {
         perror("Send failed : ");
@@ -358,7 +383,6 @@ string tcp_client::receive_bytes(int size=512)
     int how_big2=0;
 
 
-    //sizeof(buffer)--> 1024
     //Receive a reply from the server
     if( recv(sock_t , buffer , sizeof(buffer) , 0) < 0)
     {
@@ -366,19 +390,16 @@ string tcp_client::receive_bytes(int size=512)
     }
     buffer[size] = 0;
 
-
     cout<<"Data recv:bytes  ";
     for(int ii=0;ii<4;ii++)
     {
       cout<<(int)buffer[ii]<<" ";
       how_big[ii]=(int)buffer[ii];
       how_big2=how_big[ii];
-
-      //std::cout << std::dec<< how_big[ii] << '\n';
     }
 
     cout<<"\n";
-    cout<<"grösse: "<<how_big2<<"\n";
+    //cout<<"grösse: "<<how_big2<<"\n";
 
 
     cout<<"Data recv:string  ";
@@ -388,8 +409,8 @@ string tcp_client::receive_bytes(int size=512)
     }
     cout<<"\n";
     for (int i=4;i<how_big2+4;i++) {
-    reply += buffer[i];
-}
+      reply += buffer[i];
+    }
 
    return reply;
 }
@@ -402,12 +423,16 @@ int main(int argc , char  **argv)
     string host="192.168.10.105";    //string host="localhost";
 
     //connect to host
-    conn(host , 4000);
+    //conn(host , 4000);
 
+    //ROS--> MyRIO
     tcp_client beta(1,"/beta",n,"Float");
-    tcp_client IMU(2,"IMU",n,"IMU");
+    tcp_client cmd(1,"/scalevo_cmd",n,"ArrayString");
 
-    //done
+    //ROS <-- MyRIO
+    tcp_client IMU(2,"IMU",n,"IMU");
+    tcp_client encoder(2,"encoder",n,"lasertech::ScalevoWheels");
+    tcp_client lambda(2,"lambda",n,"ArrayFloat");
 
     return 0;
 }
