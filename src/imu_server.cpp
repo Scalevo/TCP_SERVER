@@ -138,26 +138,33 @@ int main(int argc , char  **argv)
 
 
       msg.header.stamp = ros::Time::now();
-      msg.header.frame_id="IMU_frame";
-	  
+      msg.header.frame_id="odom";
+	  /**
       msg.orientation.x=orientation_vec[0];
       msg.orientation.y=orientation_vec[1];
       msg.orientation.z=orientation_vec[2];
-      msg.orientation.w=1;
-	  
-	  msg.angular_velocity.x=values[4];
-	  msg.angular_velocity.y=values[4];
-	  msg.angular_velocity.z=values[4];
+      **/
+      msg.orientation.x=0.5;//sqrt(2);
+      msg.orientation.y=0.5;//sqrt(2);
+      msg.orientation.z=0;
 
-	  
-	  
+
+      msg.orientation.w=1;
+
+      msg.angular_velocity.x=values[4];
+      msg.angular_velocity.y=values[4];
+      msg.angular_velocity.z=values[4];
+
+
+
       msg.linear_acceleration.x=values[4];
       msg.linear_acceleration.y=values[5];
-      msg.linear_acceleration.z=values[6];
+      msg.linear_acceleration.z=-9,81;//values[6];
 	  
 	  
 
       cout<<msg<<"\n";
+      chatter_pub_imu.publish(msg);
 
       /**
 
