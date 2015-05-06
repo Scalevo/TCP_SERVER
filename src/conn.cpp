@@ -1,10 +1,8 @@
-
-
 #include "conn.h"
 /**
     Connect to a host on a certain port number
 */
-    
+
 bool conn(string address , int port)
 {
     //create socket if it is not already created

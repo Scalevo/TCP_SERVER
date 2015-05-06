@@ -28,7 +28,8 @@
 
 // ros includes
 #include <ros/ros.h>
-#include "std_msgs/Float32.h"
+#include "std_msgs/Float64.h"
+#include "std_msgs/Float64MultiArray.h"
 #include "sensor_msgs/Imu.h"
 
 #include "tcp_server/ScalevoWheels.h"
@@ -46,29 +47,33 @@ class tcp_client
 {
 private:
   
-    int direction;
-    std::string topic;
- 
-    ros::Subscriber sub;
-    ros::Publisher pub;
 
-    ros::NodeHandle n_;
-    std::string msg_type_;
+  ros::NodeHandle n_;
+  ros::Subscriber sub;
+  ros::Publisher pub;
 
-    std::vector<float> values;
+// Object Parameters
+  std::string msg_type_;
+  int direction;
+  std::string topic;
 
+// Message Values
+  std::vector<double> values;
+  std::string header;
+  std::string header2;
 
 public:
-    tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg_type);
-    bool send_data(string data);
-    string receive_bytes(int);
-    void Callback(const std_msgs::Float32::ConstPtr& msg);
-    void parser(std::string s);
+  tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg_type);
+  bool send_data(string data);
+  string receive_bytes(int);
+  void Callback(const std_msgs::Float64::ConstPtr& msg);
+  void parser(std::string s);
+  void publish();
 
-    static int sock;
-    static std::string address;
-    static int port;
-    static struct sockaddr_in server;
+  static int sock;
+  static std::string address;
+  static int port;
+  static struct sockaddr_in server;
 
 };
 

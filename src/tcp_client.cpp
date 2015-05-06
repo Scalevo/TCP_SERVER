@@ -7,13 +7,6 @@
  std::string tcp_client::address = "";
  struct sockaddr_in tcp_client::server;
 
-void tcp_client::Callback(const std_msgs::Float32::ConstPtr& msg)
-{
-  std::ostringstream buff;
-  buff<<msg->data;
-  std::string data = buff.str();
-  send_data(data);
-}
 
 tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg_type): direction(dir), topic(top),n_(n),msg_type_(msg_type)
 {
@@ -27,13 +20,13 @@ tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg
 	{
  
     int count = 0;
-    ros::Rate loop_rate(1);
+    ros::Rate loop_rate(20);
     while(ros::ok())
     {
-      //parser("IMU:198,132,3123,23,1498,12348,666");
       //ROS_INFO("BLABLABLAB %d",count);
       
       parser(receive_bytes(1024));
+      //parser("DATA:Stair_parameters:0.17,.3");
 
       ros::spinOnce();
       loop_rate.sleep();
@@ -42,6 +35,15 @@ tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg
 	} 
 
 }
+
+void tcp_client::Callback(const std_msgs::Float64::ConstPtr& msg)
+{
+  std::ostringstream buff;
+  buff<<msg->data;
+  std::string data = buff.str();
+  send_data(data);
+}
+
 
 void tcp_client::parser(std::string s) {
 
@@ -54,8 +56,7 @@ void tcp_client::parser(std::string s) {
     size_t pos = 0;
     size_t pos2 = 0;
     int count=0;
-    std::string header;
-    std::string header2;
+
 
     std::string parameter_x;
     float values_parameter[12];
@@ -64,7 +65,7 @@ void tcp_client::parser(std::string s) {
     while ((pos = s.find(delimiter)) != std::string::npos)
     {
     header = s.substr(0, pos);
-    ROS_INFO("header1: %s",header.c_str());
+    //ROS_INFO("header1: %s",header.c_str());
     //std::cout << " message header: " << header << std::endl;
     //std::cout << " s zum ersten: " << s << std::endl;
     s.erase(0, pos + delimiter.length());
@@ -74,7 +75,7 @@ void tcp_client::parser(std::string s) {
       //cout <<"blablabla\n";
       pos = s.find(delimiter2);
       header2 = s.substr(0, pos);
-      ROS_INFO("header2: %s",header2.c_str());
+      //ROS_INFO("header2: %s",header2.c_str());
       //std::cout << " message header: " << header << std::endl;
       //std::cout << " s zum ersten: " << s << std::endl;
       s.erase(0, pos + delimiter2.length());
@@ -90,9 +91,10 @@ void tcp_client::parser(std::string s) {
     //cout <<"header2"<<header2<<"\n";
 
 
-    if (header2== _topic )
+    if (header2 ==_topic )
     {
-      //ROS_INFO("topic: %s",topic.c_str());
+      ROS_INFO("topic: %s",_topic.c_str());
+      ROS_INFO("header2: %s",header2.c_str());
 
     while ((pos2 = s.find(delimiter2)) != std::string::npos)
     {
@@ -111,10 +113,14 @@ void tcp_client::parser(std::string s) {
     values_parameter[count]=atof (parameter_x.c_str());
     values.push_back(atof (parameter_x.c_str()));
 
-    ROS_INFO("value_%i: %f",count,values[count]);
+    //ROS_INFO("value_%i: %f",count,values[count]);
     ROS_INFO("VECTOR SIZE: %zu ",values.size());
+
+    publish();
+
     }
 
+    ROS_INFO("Message has been parsed.");
     /**else if (header2=="CMD")
     {
 
@@ -127,7 +133,12 @@ void tcp_client::parser(std::string s) {
     }
 **/
 
-    if(msg_type_== "IMU" && header2=="IMU")
+
+}
+
+void tcp_client::publish() {
+
+      if(msg_type_== "IMU" && header2=="IMU")
     {
       ROS_INFO("ich bin drin: %s",msg_type_.c_str());
 
@@ -194,13 +205,26 @@ void tcp_client::parser(std::string s) {
       //cout<<msg<<"\n";
       pub.publish(msg);
     }
-    else if(msg_type_== "Float")
+    else if(msg_type_== "Float64")
     {
-      cout<< "bin i msg type float";
+      pub = n_.advertise<std_msgs::Float64>(topic,5);
+      std_msgs::Float64 msg;
+
+      msg.data = values[0];
+
+      pub.publish(msg);
+      ROS_INFO("Topic %s has been published.",topic.c_str());
+
     }
-    else if(msg_type_==  "FloatArray")
+    else if(msg_type_==  "Float64MultiArray")
     {
-      cout<< "bin i msg type FloatArray";
+      pub = n_.advertise<std_msgs::Float64MultiArray>(topic,5);
+      std_msgs::Float64MultiArray msg;
+
+      for(int i=0;i<values.size();i++) msg.data.push_back(values[i]);
+      
+      pub.publish(msg);
+      ROS_INFO("Topic %s has been published.",topic.c_str());
 
     }
     else if(msg_type_==  "Encoder")
@@ -235,8 +259,8 @@ void tcp_client::parser(std::string s) {
     {
       ROS_WARN("Uncorrect msg_type: %s",msg_type_.c_str());
     }
-
 }
+
 
 
 /**
@@ -313,7 +337,7 @@ string tcp_client::receive_bytes(int size=512)
       reply += buffer[i];
     }
     cout<<"\n";
-    ROS_INFO("msg_recv: %s",reply.c_str());
+    //ROS_INFO("msg_recv: %s",reply.c_str());
 
    return reply;
 }
