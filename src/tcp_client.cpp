@@ -1,87 +1,11 @@
-/**
-    C++ client example using sockets
-*/
-#include<iostream>  //cout
-#include<stdio.h>   //printf
-#include<string.h>  //strlen
-#include<string>    //string
-#include<sys/socket.h>  //socket
-#include<arpa/inet.h>   //inet_addr
-#include<netdb.h>   //hostent
-#include <sstream>
-
-#include <signal.h> //crtl+c
-#include <stdio.h>
-
-#include <unistd.h>
-
-#include <stdlib.h>
-#include <ctype.h>
-
-//#include"conio.h"
-#include"string.h"
-#include"math.h"
+#include "tcp_client.h"
 
 
-// ros includes
-#include <ros/ros.h>
-#include "std_msgs/Float32.h"
-#include "sensor_msgs/Imu.h"
-
-#include "tcp_server/ScalevoWheels.h"
-
-//#include <Eigen/Dense>
-#include <eigen3/Eigen/Dense>
-
-
-using namespace std;
-
-/**
-    TCP Client class
-*/
-class tcp_client
-{
-private:
-  
-    int direction;
-    std::string topic;
- 
-    ros::Subscriber sub;
-    ros::Publisher pub;
-
-    ros::NodeHandle n_;
-    std::string msg_type_;
-
-    std::vector<float> values;
-
-
-public:
-    tcp_client();
-    tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg_type);
-    bool send_data(string data);
-    string receive_bytes(int);
-    void Callback(const std_msgs::Float32::ConstPtr& msg);
-    void parser(std::string s);
-
-    static int sock;
-    int sock_t;
-    static std::string address;
-    static int port;
-    static struct sockaddr_in server;
-
-};
 
  int tcp_client::sock = -1;
  int tcp_client::port = 0;
  std::string tcp_client::address = "";
  struct sockaddr_in tcp_client::server;
-
-tcp_client::tcp_client()
-{
-  //  sock = -1;
-  //  port = 0;
-  //  address = "";
-}
 
 void tcp_client::Callback(const std_msgs::Float32::ConstPtr& msg)
 {
@@ -93,7 +17,7 @@ void tcp_client::Callback(const std_msgs::Float32::ConstPtr& msg)
 
 tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg_type): direction(dir), topic(top),n_(n),msg_type_(msg_type)
 {
-   sock_t = sock;
+
     if (direction==1)	// Send to MyRio
 	{
 	  sub = n_.subscribe(topic,10, &tcp_client::Callback, this); 
@@ -108,10 +32,8 @@ tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg
     {
       //parser("IMU:198,132,3123,23,1498,12348,666");
       //ROS_INFO("BLABLABLAB %d",count);
-        std::string test;
-      test = receive_bytes(1024);
-        //std::cout << test << std::endl;
-      parser(test);
+      
+      parser(receive_bytes(1024));
 
       ros::spinOnce();
       loop_rate.sleep();
@@ -285,7 +207,7 @@ void tcp_client::parser(std::string s) {
     {
       cout<< "bin i msg type Encoder";
 
-      /**
+      /*
       pub = n_.advertise<tcp_server::ScalevoWheels>(topic,1);
       tcp_server::ScalevoWheels msg;
 
@@ -311,83 +233,11 @@ void tcp_client::parser(std::string s) {
     }
     else
     {
-      //ROS_WARN("Uncorrect msg_type: %s",msg_type_);
+      ROS_WARN("Uncorrect msg_type: %s",msg_type_.c_str());
     }
 
 }
 
-/**
-    Connect to a host on a certain port number
-*/
-bool conn(string address , int port)
-{
-    //create socket if it is not already created
-
-    if(tcp_client::sock == -1)
-    {
-        //Create socket
-        tcp_client::sock = socket(AF_INET , SOCK_STREAM , 0);
-        if (tcp_client::sock == -1)
-        {
-            perror("Could not create socket");
-        }
-
-        cout<<"Socket created\n";
-    }
-    else    {   /* OK , nothing */   }
-
-    //setup address structure
-    if(inet_addr(address.c_str()) == -1)
-    {
-        struct hostent *he;
-        struct in_addr **addr_list;
-
-        //resolve the hostname, its not an ip address
-        if ( (he = gethostbyname( address.c_str() ) ) == NULL)
-        {
-            //gethostbyname failed
-            herror("gethostbyname");
-            cout<<"Failed to resolve hostname\n";
-
-            return false;
-        }
-
-        //Cast the h_addr_list to in_addr , since h_addr_list also has the ip address in long format only
-        addr_list = (struct in_addr **) he->h_addr_list;
-
-        for(int i = 0; addr_list[i] != NULL; i++)
-        {
-            //strcpy(ip , inet_ntoa(*addr_list[i]) );
-            tcp_client::server.sin_addr = *addr_list[i];
-
-            cout<<address<<" resolved to "<<inet_ntoa(*addr_list[i])<<endl;
-
-            break;
-        }
-    }
-
-    //plain ip address
-    else
-    {
-        tcp_client::server.sin_addr.s_addr = inet_addr( address.c_str() );
-    }
-
-    tcp_client::server.sin_family = AF_INET;
-    tcp_client::server.sin_port = htons( port );
-
-    //Connect to remote server
-    if (connect(tcp_client::sock , (struct sockaddr *)&tcp_client::server , sizeof(tcp_client::server)) < 0)
-    {
-        perror("connect failed. Error");
-        return 1;
-        exit(0);
-    }
-
-    cout<<"Connected\n";
-    tcp_client::address = address;
-    tcp_client::port = port;
-    return true;
-}
 
 /**
     Send data to the connected host
@@ -410,7 +260,7 @@ bool tcp_client::send_data(string data)
     memcpy( &str[4], data.c_str(), length );
 
     //Send some data
-    if( send(sock_t , str , length+4 , 0) < 0)
+    if( send(sock , str , length+4 , 0) < 0)
     {
         perror("Send failed : ");
         return false;
@@ -432,7 +282,7 @@ string tcp_client::receive_bytes(int size=512)
 
 
     //Receive a reply from the server
-    if( recv(sock_t , buffer , sizeof(buffer) , 0) < 0)
+    if( recv(sock , buffer , sizeof(buffer) , 0) < 0)
     {
         //puts("recv failed");
         ROS_ERROR("recv failed!!");
@@ -467,26 +317,3 @@ string tcp_client::receive_bytes(int size=512)
 
    return reply;
 }
-
-int main(int argc , char  **argv)
-{
-    ros::init(argc, argv, "tcp_server");
-    ros::NodeHandle n;
-
-    string host="192.168.10.100";    //string host="localhost";
-
-    //connect to host
-    conn(host , 4000);
-
-    //ROS--> MyRIO
-    tcp_client beta(1,"/beta",n,"Float");
-    tcp_client cmd(1,"/scalevo_cmd",n,"ArrayString");
-
-    //ROS <-- MyRIO
-    tcp_client IMU(2,"IMU",n,"IMU");
-    tcp_client encoder(2,"encoder",n,"lasertech::ScalevoWheels");
-    tcp_client lambda(2,"lambda",n,"ArrayFloat");
-
-    return 0;
-}
-

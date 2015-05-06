@@ -179,7 +179,9 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
-add_executable(tcp_client src/tcp_client.cpp)
+add_executable(tcp_client src/main.cpp
+                          src/tcp_client.cpp
+                          src/conn.cpp)
 target_link_libraries(tcp_client ${catkin_LIBRARIES})
 add_dependencies(tcp_client tcp_server_generate_messages_cpp)
 

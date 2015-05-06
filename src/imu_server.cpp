@@ -1,13 +1,13 @@
 /**
     C++ client example using sockets
 */
-#include<iostream>  //cout
-#include<stdio.h>   //printf
-#include<string.h>  //strlen
-#include<string>    //string
-#include<sys/socket.h>  //socket
-#include<arpa/inet.h>   //inet_addr
-#include<netdb.h>   //hostent
+#include <iostream>  //cout
+#include <stdio.h>   //printf
+#include <string.h>  //strlen
+#include <string>    //string
+#include <sys/socket.h>  //socket
+#include <arpa/inet.h>   //inet_addr
+#include <netdb.h>   //hostent
 #include <sstream>
 
 #include <signal.h> //crtl+c
@@ -19,8 +19,8 @@
 #include <ctype.h>
 
 //#include"conio.h"
-#include"string.h"
-#include"math.h"
+#include "string.h"
+#include "math.h"
 
 
 // ros includes
