@@ -186,12 +186,6 @@ target_link_libraries(tcp_client ${catkin_LIBRARIES})
 add_dependencies(tcp_client tcp_server_generate_messages_cpp)
 
 
-
-add_executable(imu_server src/imu_server.cpp)
-target_link_libraries(imu_server ${catkin_LIBRARIES})
-add_dependencies(imu_server tcp_server_generate_messages_cpp)
-
-
 #############
 ## Testing ##
 #############
