@@ -18,7 +18,7 @@ tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg
 
     else if (direction==2) // Get from MyRio
 	{
- 
+    // .... comment this...
     int count = 0;
     ros::Rate loop_rate(20);
     while(ros::ok())
@@ -32,6 +32,7 @@ tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg
       loop_rate.sleep();
       count++;
 	   }
+     // ...untill here
 	} 
 
 }

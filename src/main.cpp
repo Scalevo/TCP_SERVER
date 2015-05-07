@@ -32,6 +32,24 @@ int main(int argc , char  **argv)
   //tcp_client stair_parameters(2,"Stair_parameters",n,"Float64MultiArray");
   //tcp_client stair_parameters(2,"Stair_parameters",n,"Float64");
 
+// If you uncomment this....... -> tcp_client::tcp_client()
+/*
+    int count = 0;
+    ros::Rate loop_rate(20);
+    while(ros::ok())
+    {
+      //ROS_INFO("BLABLABLAB %d",count);
+      
+      lambda.parser(lambda.receive_bytes(1024));
+      IMU.parser(IMU.receive_bytes(1024));
+
+      //parser("DATA:Stair_parameters:0.17,.3");
+
+      ros::spinOnce();
+      loop_rate.sleep();
+      count++;
+     }
+*/
   return 0;
 }
 
