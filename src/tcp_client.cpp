@@ -13,6 +13,7 @@ tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg
 
     if (direction==1)	// Send to MyRio
 	{
+    std::string _topic = "/" + topic;
     if (msg_type_ == "Float64")   {sub = n_.subscribe(topic,10, &tcp_client::CallbackF64, this);}
     else if (msg_type == "Float64MultiArray") {sub = n_.subscribe(topic,10, &tcp_client::CallbackF64MA, this);}
     else if (msg_type == "String") {sub = n_.subscribe(topic,10, &tcp_client::CallbackS, this);

@@ -22,9 +22,9 @@ int main(int argc , char  **argv)
   conn(host,port);
 
   //ROS --> MyRIO
-  //tcp_client beta(1,"/beta",n,"Float64");
+  tcp_client beta(1,"/beta",n,"Float64");
   //tcp_client cmd(1,"/scalevo_cmd",n,"ArrayString");
-  tcp_client stair_parameters(1,"/stair_parameters",n,"Float64MultiArray");
+  tcp_client stair_parameters(1,"stair_parameters",n,"Float64MultiArray");
 
 
   //MyRIO --> ROS
