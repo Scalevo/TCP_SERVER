@@ -19,6 +19,7 @@ tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg
     else if (direction==2) // Get from MyRio
 	{
     // .... comment this...
+    /*
     int count = 0;
     ros::Rate loop_rate(20);
     while(ros::ok())
@@ -32,6 +33,7 @@ tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg
       loop_rate.sleep();
       count++;
 	   }
+     */
      // ...untill here
 	} 
 
@@ -228,9 +230,9 @@ void tcp_client::publish() {
       ROS_INFO("Topic %s has been published.",topic.c_str());
 
     }
-    else if(msg_type_==  "Encoder")
+    else if(msg_type_==  "lasertech::ScalevoWheels")
     {
-      cout<< "bin i msg type Encoder";
+      ROS_INFO("Topic %s would have been published, if it had been implemented.",topic.c_str());
 
       /*
       pub = n_.advertise<tcp_server::ScalevoWheels>(topic,1);
@@ -258,7 +260,7 @@ void tcp_client::publish() {
     }
     else
     {
-      ROS_WARN("Uncorrect msg_type: %s",msg_type_.c_str());
+      ROS_WARN("Incorrect msg_type: %s",msg_type_.c_str());
     }
 }
 
