@@ -1,11 +1,11 @@
 #include "tcp_client.h"
 
+//Initialize static variables of tcp_client object.
 
-
- int tcp_client::sock = -1;
- int tcp_client::port = 0;
- std::string tcp_client::address = "";
- struct sockaddr_in tcp_client::server;
+int tcp_client::sock = -1;
+int tcp_client::port = 0;
+std::string tcp_client::address = "";
+struct sockaddr_in tcp_client::server;
 
 
 tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg_type): direction(dir), topic(top),n_(n),msg_type_(msg_type)
@@ -13,7 +13,10 @@ tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg
 
     if (direction==1)	// Send to MyRio
 	{
-	  sub = n_.subscribe(topic,10, &tcp_client::Callback, this); 
+    if (msg_type_ == "Float64")   {sub = n_.subscribe(topic,10, &tcp_client::CallbackF64, this);}
+    else if (msg_type == "Float64MultiArray") {sub = n_.subscribe(topic,10, &tcp_client::CallbackF64MA, this);}
+    else if (msg_type == "String") {sub = n_.subscribe(topic,10, &tcp_client::CallbackS, this);
+}
 	}
 
     else if (direction==2) // Get from MyRio
@@ -36,16 +39,40 @@ tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg
      */
      // ...untill here
 	} 
-
 }
 
-void tcp_client::Callback(const std_msgs::Float64::ConstPtr& msg)
+// Callback for Float64
+void tcp_client::CallbackF64(const std_msgs::Float64::ConstPtr& msg)
 {
   std::ostringstream buff;
   buff<<msg->data;
   std::string data = buff.str();
   send_data(data);
 }
+
+// Callback for Float64MultiArray
+void tcp_client::CallbackF64MA(const std_msgs::Float64MultiArray::ConstPtr& msg)
+{
+  std::string data;
+  data = "DATA:";
+  data += topic;
+  data += ":";
+  for (int i=0;i<msg->data.size();i++){
+  std::ostringstream buff;
+  buff<<msg->data[i];
+  data += buff.str();
+  data += ",";
+  }
+
+  send_data(data);
+}
+
+// Callback for String
+void tcp_client::CallbackS(const std_msgs::String::ConstPtr& msg)
+{
+
+}
+
 
 
 void tcp_client::parser(std::string s) {
@@ -96,8 +123,8 @@ void tcp_client::parser(std::string s) {
 
     if (header2 ==_topic )
     {
-      ROS_INFO("topic: %s",_topic.c_str());
-      ROS_INFO("header2: %s",header2.c_str());
+      //ROS_INFO("topic: %s",_topic.c_str());
+      //ROS_INFO("header2: %s",header2.c_str());
 
     while ((pos2 = s.find(delimiter2)) != std::string::npos)
     {
@@ -139,10 +166,11 @@ void tcp_client::parser(std::string s) {
 
 }
 
-void tcp_client::publish() {
+void tcp_client::publish()
+{
 
       if(msg_type_== "IMU" && header2=="IMU")
-    {
+{
       ROS_INFO("ich bin drin: %s",msg_type_.c_str());
 
       pub = n_.advertise<sensor_msgs::Imu>(topic,5);
@@ -271,7 +299,6 @@ void tcp_client::publish() {
 */
 bool tcp_client::send_data(string data)
 {
-    ROS_INFO("msg_send: %s",data.c_str());
 
     int length=data.length();
     char bytes[5];
@@ -293,6 +320,7 @@ bool tcp_client::send_data(string data)
         return false;
     }
     //cout<<"Data send: "<<str<<"\n";
+    ROS_INFO("msg_send: %s",data.c_str());
 
     return true;
 }

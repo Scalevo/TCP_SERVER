@@ -24,6 +24,8 @@ int main(int argc , char  **argv)
   //ROS --> MyRIO
   //tcp_client beta(1,"/beta",n,"Float64");
   //tcp_client cmd(1,"/scalevo_cmd",n,"ArrayString");
+  tcp_client stair_parameters(1,"/stair_parameters",n,"Float64MultiArray");
+
 
   //MyRIO --> ROS
   //tcp_client IMU(2,"IMU",n,"IMU");
@@ -50,6 +52,7 @@ int main(int argc , char  **argv)
       count++;
      }
 
+  //ros::spin();
   return 0;
 }
 

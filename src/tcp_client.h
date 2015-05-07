@@ -30,6 +30,8 @@
 #include <ros/ros.h>
 #include "std_msgs/Float64.h"
 #include "std_msgs/Float64MultiArray.h"
+#include "std_msgs/String.h"
+
 #include "sensor_msgs/Imu.h"
 
 #include "tcp_server/ScalevoWheels.h"
@@ -66,7 +68,10 @@ public:
   tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg_type);
   bool send_data(string data);
   string receive_bytes(int);
-  void Callback(const std_msgs::Float64::ConstPtr& msg);
+  void CallbackF64(const std_msgs::Float64::ConstPtr& msg);
+  void CallbackF64MA(const std_msgs::Float64MultiArray::ConstPtr& msg);
+  void CallbackS(const std_msgs::String::ConstPtr& msg);
+
   void parser(std::string s);
   void publish();
 
