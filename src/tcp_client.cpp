@@ -127,27 +127,27 @@ void tcp_client::parser(std::string s) {
       //ROS_INFO("topic: %s",_topic.c_str());
       //ROS_INFO("header2: %s",header2.c_str());
 
-    while ((pos2 = s.find(delimiter2)) != std::string::npos)
-    {
-    parameter_x = s.substr(0, pos2);
-    //std::cout << " parameter_: " <<count<<" :"<< parameter_x << std::endl;
+    	while ((pos2 = s.find(delimiter2)) != std::string::npos)
+    	{
+    		parameter_x = s.substr(0, pos2);
+    		//std::cout << " parameter_: " <<count<<" :"<< parameter_x << std::endl;
 
-    values_parameter[count]=atof (parameter_x.c_str());
-    values.push_back(atof (parameter_x.c_str()));
-    ROS_INFO("value_%i: %f",count,values[count]);
-    count++;
-    //std::cout << " s zum zweiten: " << s << std::endl;
-    s.erase(0, pos2 + delimiter2.length());
-    }
-    parameter_x = s.substr(0, pos2);
+    		values_parameter[count]=atof (parameter_x.c_str());
+    		values.push_back(atof (parameter_x.c_str()));
+    		ROS_INFO("value_%i: %f",count,values[count]);
+    		count++;
+    		//std::cout << " s zum zweiten: " << s << std::endl;
+   		s.erase(0, pos2 + delimiter2.length());
+    	}
+    	parameter_x = s.substr(0, pos2);
 
-    values_parameter[count]=atof (parameter_x.c_str());
-    values.push_back(atof (parameter_x.c_str()));
+    	values_parameter[count]=atof (parameter_x.c_str());
+    	values.push_back(atof (parameter_x.c_str()));
 
-    //ROS_INFO("value_%i: %f",count,values[count]);
-    ROS_INFO("VECTOR SIZE: %zu ",values.size());
+    	//ROS_INFO("value_%i: %f",count,values[count]);
+    	ROS_INFO("VECTOR SIZE: %zu ",values.size());
 
-    publish();
+    	publish();
 
     }
 
