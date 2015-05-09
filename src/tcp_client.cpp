@@ -43,7 +43,7 @@ void tcp_client::CallbackF64MA(const std_msgs::Float64MultiArray::ConstPtr& msg)
   std::string data;
   data = "DATA:";
   data += topic;
-  data += ":";
+  data += ",";
   for (int i=0;i<msg->data.size();i++){
   std::ostringstream buff;
   buff<<msg->data[i];
