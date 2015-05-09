@@ -1,4 +1,5 @@
 #include "tcp_client.h"
+#include <tf/transform_broadcaster.h>
 
 //Initialize static variables of tcp_client object.
 
@@ -175,10 +176,15 @@ void tcp_client::publish()
     msg.header.stamp = ros::Time::now();
     msg.header.frame_id="odom";
 
-    msg.orientation.x=x_angle_ori;
-    msg.orientation.y=y_angle_ori;
-    msg.orientation.z=z_angle_ori;
-    msg.orientation.w=1;
+    tf::Quaternion q;
+    q.setRPY(x_angle_ori,x_angle_ori,x_angle_ori);
+//    setEulerYPR(x_angle_ori,x_angle_ori,x_angle_ori);
+//    cout << q[0];
+
+    msg.orientation.x=q[0];
+    msg.orientation.y=q[1];
+    msg.orientation.z=q[2];
+    msg.orientation.w=q[3];
 
     msg.angular_velocity.x=x_accel;
     msg.angular_velocity.y=y_accel;
