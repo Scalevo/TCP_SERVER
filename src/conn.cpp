@@ -14,6 +14,8 @@ bool conn(string address , int port)
         if (tcp_client::sock == -1)
         {
             perror("Could not create socket");
+            return false;
+            exit(1);
         }
 
         cout<<"Socket created\n";
@@ -63,8 +65,8 @@ bool conn(string address , int port)
     if (connect(tcp_client::sock , (struct sockaddr *)&tcp_client::server , sizeof(tcp_client::server)) < 0)
     {
         perror("connect failed. Error");
-        return 1;
-        exit(0);
+        return false;
+        exit(1);
     }
 
     cout<<"Connected\n";
