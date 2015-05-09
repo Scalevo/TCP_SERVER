@@ -1,5 +1,6 @@
 #include "tcp_client.h"
 #include <tf/transform_broadcaster.h>
+#include "geometry_msgs/Quaternion.h"
 
 //Initialize static variables of tcp_client object.
 
@@ -96,7 +97,7 @@ void tcp_client::parser(std::string s) {
     		parameter_x = s.substr(0, pos2);
     		values_parameter[count]=atof (parameter_x.c_str());
     		values.push_back(atof (parameter_x.c_str()));
-    		ROS_INFO("value_%i: %f",count,values[count]);
+    		//ROS_INFO("value_%i: %f",count,values[count]);
     		count++;
    		s.erase(0, pos2 + delimiter2.length());
     	}
@@ -108,9 +109,9 @@ void tcp_client::parser(std::string s) {
     	//ROS_INFO("value_%i: %f",count,values[count]);
     	//ROS_INFO("VECTOR SIZE: %zu ",values.size());
     	publish();
+      //ROS_INFO("Message has been parsed.");
     }
 
-    ROS_INFO("Message has been parsed.");
     /**else if (header2=="CMD")
     {
 
@@ -127,12 +128,11 @@ void tcp_client::parser(std::string s) {
 
 void tcp_client::publish()
 {
-
-  if(msg_type_== "IMU" && header2=="IMU")
+  if(msg_type_== "IMU" )//&& header2=="IMU")
   {
     //ROS_INFO("ich bin drin: %s",msg_type_.c_str());
 
-    pub = n_.advertise<sensor_msgs::Imu>(topic,5);
+    pub = n_.advertise<sensor_msgs::Imu>("IMU",5);
     sensor_msgs::Imu msg;
 
     //wrong coordinate systems: correction
@@ -145,9 +145,9 @@ void tcp_client::publish()
     float y_accel=values[3];
     float z_accel=-values[5];
 
-    float x_angle_vel=values[7];
+    float x_angle_vel=-values[7];
     float y_angle_vel=values[6];
-    float z_angle_vel=-values[8];
+    float z_angle_vel=values[8];
     //conversion from angle to unit vector
     /** DO NOT delete, needs testing...
     float Ax[3][3] =
@@ -176,23 +176,28 @@ void tcp_client::publish()
     msg.header.stamp = ros::Time::now();
     msg.header.frame_id="odom";
 
-    tf::Quaternion q;
-    q.setRPY(x_angle_ori,x_angle_ori,x_angle_ori);
+    tf::Quaternion q_tf;
+    q_tf.setRPY(x_angle_ori,x_angle_ori,x_angle_ori);
+
+    geometry_msgs::Quaternion q_qm;
+    tf::quaternionTFToMsg(q_tf, q_qm);
+
+
 //    setEulerYPR(x_angle_ori,x_angle_ori,x_angle_ori);
 //    cout << q[0];
 
-    msg.orientation.x=q[0];
-    msg.orientation.y=q[1];
-    msg.orientation.z=q[2];
-    msg.orientation.w=q[3];
+    msg.orientation.x=q_qm.x;
+    msg.orientation.y=q_qm.y;
+    msg.orientation.z=q_qm.z;
+    msg.orientation.w=q_qm.w;
 
-    msg.angular_velocity.x=x_accel;
-    msg.angular_velocity.y=y_accel;
-    msg.angular_velocity.z=z_accel;
+    msg.angular_velocity.x=x_angle_vel;
+    msg.angular_velocity.y=y_angle_vel;
+    msg.angular_velocity.z=z_angle_vel;
 
-    msg.linear_acceleration.x=x_angle_vel;
-    msg.linear_acceleration.y=x_angle_vel;
-    msg.linear_acceleration.z=x_angle_vel;
+    msg.linear_acceleration.x=x_accel;
+    msg.linear_acceleration.y=y_accel;
+    msg.linear_acceleration.z=z_accel;
 
     pub.publish(msg);
     ROS_INFO("Topic %s has been published.",topic.c_str());
@@ -229,6 +234,8 @@ void tcp_client::publish()
       tcp_server::ScalevoWheels msg;
 
       msg.header.stamp = ros::Time::now();
+      msg.header.frame_id="odom";
+
 
       msg.travel[0]=values[0];
       msg.travel[1]=values[1];
@@ -236,8 +243,8 @@ void tcp_client::publish()
       msg.speed[0]=values[2];
       msg.speed[1]=values[3];
 
-      msg.travel_tracks[0]=values[0];
-      msg.travel_tracks[1]=values[1];
+      msg.travel_tracks[0]=values[4];
+      msg.travel_tracks[1]=values[5];
 
       pub.publish(msg);
       ROS_INFO("Topic %s has been published.",topic.c_str());
