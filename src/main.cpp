@@ -45,6 +45,8 @@ int main(int argc , char  **argv)
     tcp_client distance_last(1,"distance_last",n,"Float64MultiArray");
     tcp_client set_vel(1,"set_vel",n,"Float64MultiArray");
     tcp_client set_pos(1,"set_pos",n,"Float64MultiArray");
+    tcp_client velocity(1,"velocity",n,"Float64MultiArray");
+
 
     //MyRIO --> ROS
     tcp_client imu(2,"IMU",n,"IMU");
