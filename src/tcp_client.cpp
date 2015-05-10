@@ -137,9 +137,9 @@ void tcp_client::publish()
 
     //wrong coordinate systems: correction
     //angles not unit vector
-    float x_angle_ori=values[1];
-    float y_angle_ori=values[0];
-    float z_angle_ori=-values[2];
+    float x_angle_ori=values[1];      //Roll
+    float y_angle_ori=values[0];      //Pitch
+    float z_angle_ori=-values[2];     //Yaw
 
     float x_accel=values[4];
     float y_accel=values[3];
@@ -181,10 +181,6 @@ void tcp_client::publish()
 
     geometry_msgs::Quaternion q_qm;
     tf::quaternionTFToMsg(q_tf, q_qm);
-
-
-//    setEulerYPR(x_angle_ori,x_angle_ori,x_angle_ori);
-//    cout << q[0];
 
     msg.orientation.x=q_qm.x;
     msg.orientation.y=q_qm.y;
