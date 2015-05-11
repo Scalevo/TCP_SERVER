@@ -2,6 +2,11 @@
 #include <tf/transform_broadcaster.h>
 #include "geometry_msgs/Quaternion.h"
 
+
+#define PI 3.14159265
+
+
+
 //Initialize static variables of tcp_client object.
 
 int tcp_client::sock = -1;
@@ -182,16 +187,17 @@ void tcp_client::publish()
     msg.header.frame_id="odom";
 
     tf::Quaternion q_tf;
-    q_tf.setRPY(x_angle_ori,x_angle_ori,x_angle_ori);
+    q_tf.setRPY(x_angle_ori,y_angle_ori,z_angle_ori);
 
     geometry_msgs::Quaternion q_qm;
     tf::quaternionTFToMsg(q_tf, q_qm);
 
-    msg.orientation.x=q_qm.x;
+    msg.orientation=q_qm;
+    /**
     msg.orientation.y=q_qm.y;
     msg.orientation.z=q_qm.z;
     msg.orientation.w=q_qm.w;
-
+     **/
     msg.angular_velocity.x=x_angle_vel;
     msg.angular_velocity.y=y_angle_vel;
     msg.angular_velocity.z=z_angle_vel;
@@ -238,11 +244,11 @@ void tcp_client::publish()
       msg.header.frame_id="odom";
 
 
-      msg.travel[0]=values[0];
-      msg.travel[1]=values[1];
+      msg.travel[0]=values[0]*2*PI;
+      msg.travel[1]=values[1]*2*PI;
 
-      msg.speed[0]=values[2];
-      msg.speed[1]=values[3];
+      msg.speed[0]=values[2]*2*PI/60;           //RTM to rad/s
+      msg.speed[1]=values[3]*2*PI/60;           //RPM to rad/s
 
       msg.travel_tracks[0]=values[4];
       msg.travel_tracks[1]=values[5];
