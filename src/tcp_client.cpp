@@ -31,32 +31,37 @@ tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg
 // Callback for Float64
 void tcp_client::CallbackF64(const std_msgs::Float64::ConstPtr& msg)
 {
-  std::ostringstream buff;
-  buff<<msg->data;
-  std::string data = buff.str();
-  send_data(data);
+  if (sub.getNumPublishers() > 0) {
+    std::ostringstream buff;
+    buff<<msg->data;
+    std::string data = buff.str();
+    send_data(data);
+  }
 }
 
 // Callback for Float64MultiArray
 void tcp_client::CallbackF64MA(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
-  std::string data;
-  data = "DATA:";
-  data += topic;
-  data += ",";
-  for (int i=0;i<msg->data.size();i++){
-  std::ostringstream buff;
-  buff<<msg->data[i];
-  data += buff.str();
-  data += ",";
-  }
-  send_data(data);
+  if (sub.getNumPublishers() > 0) {
+    std::string data;
+    data = "DATA:";
+    data += topic;
+    data += ",";
+    for (int i=0; i < msg->data.size(); i++) {
+      std::ostringstream buff;
+      buff<<msg->data[i];
+      data += buff.str();
+      data += ",";
+      send_data(data);
+    }
+}
 }
 
 // Callback for String
 void tcp_client::CallbackS(const std_msgs::String::ConstPtr& msg)
 {
-
+  if (sub.getNumPublishers() > 0) {
+}
 }
 
 void tcp_client::parser(std::string s) {
