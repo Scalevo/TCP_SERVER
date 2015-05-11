@@ -55,7 +55,7 @@ int main(int argc , char  **argv)
     //tcp_client stair_parameters(2,"Stair_parameters",n,"Float64");
 
     int count = 0;
-    ros::Rate loop_rate(1000);
+    ros::Rate loop_rate(100);
     while(ros::ok())
     {
       std::string receivedString= lambda.receive_bytes(1024);
