@@ -21,17 +21,17 @@ int main(int argc , char  **argv)
   n.param("/tcp_server/port",port,4000);
 
   //connect to host
-  while(tries<5 && isConnected==false){
+  int numberOfTries=500;
+  while(tries<numberOfTries && isConnected==false){
     tries++;
     isConnected=conn(host,port);
     if(isConnected==false){
       ROS_WARN("connection failed for the %d time",tries);
       ROS_WARN("Trying again in 1 sec");
-      if(tries==5){
+      if(tries==numberOfTries){
         ROS_ERROR("BAUAB ES FUNKTIONIERT NOED... \n ISCH DE MYRIO AM LAUFE?? \n ODER BISCH DU IM SCALAN??");
       }
     }
-
     sleep(1);
   }
 
