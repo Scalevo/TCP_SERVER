@@ -79,6 +79,30 @@ void tcp_client::CallbackS(const std_msgs::String::ConstPtr& msg)
 	data += buff.str();
 	send_data(data);
   }
+	if(sub.getNumPublishers() > 0){
+		std::ostringstream buffer2;
+		buffer2<<msg->data;
+		std::string data2;
+
+		if(topic=="scalevo_cmd"){
+			data2="CMD:";
+			data2 += ",";
+			data2 += buffer2.str();
+			send_data(data2);
+		}
+		if(topic=="scalevo_msg"){
+			data2="MSG:";
+			data2 += ",";
+			data2 += buffer2.str();
+			send_data(data2);
+		}
+		if(topic=="scalevo_err"){
+			data2="ERR:";
+			data2 += ",";
+			data2 += buffer2.str();
+			send_data(data2);
+		}	
+	}
 }
 
 void tcp_client::parser(std::string s) {

@@ -38,16 +38,23 @@ int main(int argc , char  **argv)
 
   if(isConnected){
     //ROS --> MyRIO
+
+    tcp_client scalevo_cmd(1,"scalevo_cmd",n,"String");                           // cmd to myRIO like Assume_safe_pos, push linMot etc.
+    tcp_client scalevo_msg(1,"scalevo_msg",n,"String");                           // msg to myRIO programm ready etc.
+    tcp_client scalevo_err(1,"scalevo_err",n,"String");                           // err to myRIO like File not found etc.
+    
     tcp_client beta(1,"beta",n,"Float64");                                        // Angle on the stairs
-    tcp_client cmd(1,"scalevo_cmd",n,"String");                                   // cmd to myRIO like Assume_safe_pos, push linMot etc.
     tcp_client stair_parameters(1,"stair_parameters",n,"Float64MultiArray");      //List of parameters:
     tcp_client distance(1,"distance",n,"Float64MultiArray");          		  //Distance to steps (first_right,first_left,last_right,last_left)
     tcp_client set_vel(1,"set_vel",n,"Float64MultiArray");                        //set velocity with angle from x and speed in x direction
     tcp_client set_pos(1,"set_pos",n,"Float64MultiArray");                        //set position with angle from x and distance from the here
-    //tcp_client velocity(1,"velocity",n,"Float64MultiArray");                    //is a duplicate from set_vel
+
+
     tcp_client info(1,"info",n,"String");
     tcp_client warning(1,"warning",n,"String");
     tcp_client error(1,"error",n,"String");
+
+
 
     //MyRIO --> ROS
     tcp_client imu(2,"IMU",n,"IMU");
