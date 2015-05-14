@@ -26,7 +26,7 @@ int main(int argc , char  **argv)
     isConnected=conn(host,port);
     if(isConnected==false){
       ROS_WARN("connection failed for the %d time",tries);
-      ROS_WARN("Trying again in 0.5 sec");
+      ROS_WARN("Trying again in 1 sec");
       if(tries==5){
         ROS_ERROR("BAUAB ES FUNKTIONIERT NOED... \n ISCH DE MYRIO AM LAUFE?? \n ODER BISCH DU IM SCALAN??");
       }
@@ -45,7 +45,7 @@ int main(int argc , char  **argv)
     
     tcp_client beta(1,"beta",n,"Float64");                                        // Angle on the stairs
     tcp_client stair_parameters(1,"stair_parameters",n,"Float64MultiArray");      //List of parameters:
-    tcp_client distance(1,"distance",n,"Float64MultiArray");          		  //Distance to steps (first_right,first_left,last_right,last_left)
+    tcp_client distance(1,"distance",n,"Float64MultiArray");          		        //Distance to steps (first_right,first_left,last_right,last_left)
     tcp_client set_vel(1,"set_vel",n,"Float64MultiArray");                        //set velocity with angle from x and speed in x direction
     tcp_client set_pos(1,"set_pos",n,"Float64MultiArray");                        //set position with angle from x and distance from the here
 
@@ -60,7 +60,7 @@ int main(int argc , char  **argv)
     tcp_client imu(2,"IMU",n,"IMU");
     tcp_client encoder(2,"Encoder",n,"lasertech::ScalevoWheels");
     tcp_client lambda(2,"Lambda",n,"Float64MultiArray");
-
+    tcp_client scainfo(2,"scainfo",n,"String");                                   // MSG, ERR, INFO etc from myRIO is published here
 
     // Services Start and Stop
       // Scadaption
@@ -91,6 +91,7 @@ int main(int argc , char  **argv)
       imu.parser(receivedString);
       distance_first.parser(receivedString);
       distance_last.parser(receivedString);
+      scainfo.parser(receivedString);
 
       ros::spinOnce();
       loop_rate.sleep();

@@ -13,6 +13,7 @@ int tcp_client::sock = -1;
 int tcp_client::port = 0;
 std::string tcp_client::address = "";
 struct sockaddr_in tcp_client::server;
+std::string string_message="";
 
 
 tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg_type): direction(dir), topic(top),n_(n),msg_type_(msg_type)
@@ -182,6 +183,12 @@ void tcp_client::parser(std::string s) {
 		ROS_ERROR("Server %s did not start",header2.c_str());
   	}
     }
+
+    if((header=="MSG")||(header=="ERR")){
+      string_message=s;
+      publish();
+    }
+
 /**else if (header2=="CMD")
     {
 
@@ -313,9 +320,19 @@ void tcp_client::publish()
       pub.publish(msg);
       ROS_INFO("Topic %s has been published.",topic.c_str());
     }
-    else if(msg_type_== "CMD")
+    else if(msg_type_== "String")
     {
-      ROS_INFO(" msg_type: %s is not implemented yet",msg_type_.c_str());
+
+      pub = n_.advertise<std_msgs::String>(topic,1);
+      std_msgs::String msg;
+      msg.data=string_message;
+
+
+      pub.publish(msg);
+
+
+      ROS_INFO("Topic %s has been published.",topic.c_str());
+
     }
     else
     {
