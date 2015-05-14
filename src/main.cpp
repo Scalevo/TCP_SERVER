@@ -60,8 +60,24 @@ int main(int argc , char  **argv)
     tcp_client imu(2,"IMU",n,"IMU");
     tcp_client encoder(2,"Encoder",n,"lasertech::ScalevoWheels");
     tcp_client lambda(2,"Lambda",n,"Float64MultiArray");
-    tcp_client distance_first(2,"distance_first",n,"scalevo_msgs::Starter");	  //start and stop analysis of distance to first step
-    tcp_client distance_last(2,"distance_last",n,"scalevo_msgs::Starter");	  //start and stop analysis of distance to last step
+
+
+    // Services Start and Stop
+      // Scadaption
+      tcp_client distance_first(2,"distance_first",n,"scalevo_msgs::Starter");	  //start and stop analysis of distance to first step
+	    tcp_client distance_last(2,"distance_last",n,"scalevo_msgs::Starter");	  //start and stop analysis of distance to last step
+	
+	    // Localtech
+	    tcp_client localtechWatchdog(2,"watchdog",n,"scalevo_msgs::Starter");
+      tcp_client posEstimator(2,"posEstimator",n,"scalevo_msgs::Starter");
+//      tcp_client localtechWatchdog(2,"watchdog",n,"scalevo_msgs::Starter");
+//      tcp_client localtechWatchdog(2,"watchdog",n,"scalevo_msgs::Starter");
+//      tcp_client localtechWatchdog(2,"watchdog",n,"scalevo_msgs::Starter");
+
+      // Scalaser
+
+
+
     //tcp_client stair_parameters(2,"Stair_parameters",n,"Float64MultiArray");
     //tcp_client stair_parameters(2,"Stair_parameters",n,"Float64");
 
