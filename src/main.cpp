@@ -41,8 +41,7 @@ int main(int argc , char  **argv)
     tcp_client beta(1,"beta",n,"Float64");                                        // Angle on the stairs
     tcp_client cmd(1,"scalevo_cmd",n,"String");                                   // cmd to myRIO like Assume_safe_pos, push linMot etc.
     tcp_client stair_parameters(1,"stair_parameters",n,"Float64MultiArray");      //List of parameters:
-    tcp_client distance_first(1,"distance_first",n,"Float64MultiArray");          //TODO create just one object?
-    tcp_client distance_last(1,"distance_last",n,"Float64MultiArray");            //TODO create just one object?
+    tcp_client distance(1,"distance",n,"Float64MultiArray");          		  //Distance to steps (first_right,first_left,last_right,last_left)
     tcp_client set_vel(1,"set_vel",n,"Float64MultiArray");                        //set velocity with angle from x and speed in x direction
     tcp_client set_pos(1,"set_pos",n,"Float64MultiArray");                        //set position with angle from x and distance from the here
     //tcp_client velocity(1,"velocity",n,"Float64MultiArray");                    //is a duplicate from set_vel
@@ -51,6 +50,8 @@ int main(int argc , char  **argv)
     tcp_client imu(2,"IMU",n,"IMU");
     tcp_client encoder(2,"Encoder",n,"lasertech::ScalevoWheels");
     tcp_client lambda(2,"Lambda",n,"Float64MultiArray");
+    tcp_client distance_first(2,"distance_first",n,"scalevo_msgs::Starter");	  //start and stop analysis of distance to first step
+    tcp_client distance_last(2,"distance_last",n,"scalevo_msgs::Starter");	  //start and stop analysis of distance to last step
     //tcp_client stair_parameters(2,"Stair_parameters",n,"Float64MultiArray");
     //tcp_client stair_parameters(2,"Stair_parameters",n,"Float64");
 
@@ -62,6 +63,8 @@ int main(int argc , char  **argv)
       lambda.parser(receivedString);
       encoder.parser(receivedString);
       imu.parser(receivedString);
+      distance_first.parser(receivedString);
+      distance_last.parser(receivedString);
 
       ros::spinOnce();
       loop_rate.sleep();

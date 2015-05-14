@@ -89,7 +89,7 @@ void tcp_client::parser(std::string s) {
     s.erase(0, pos + delimiter.length());
     }
 
-    if(header=="DATA"){
+    if((header=="DATA")||(header=="SRV")){
       pos = s.find(delimiter2);
       header2 = s.substr(0, pos);
       //ROS_INFO("header2: %s",header2.c_str());
@@ -100,7 +100,7 @@ void tcp_client::parser(std::string s) {
     //FIXME topic hat leerschlag davor, wieso??...
     std::string _topic=" "+topic;
 
-    if (header2 ==_topic )
+    if ((header == "DATA") && (header2 ==_topic) )
     {
     	while ((pos2 = s.find(delimiter2)) != std::string::npos)
     	{
@@ -122,10 +122,31 @@ void tcp_client::parser(std::string s) {
       //ROS_INFO("Message has been parsed.");
     }
 
-    /**else if (header2=="CMD")
+    else if ((header=="SRV") && (header2 ==_topic) )
     {
+	ros::ServiceClient client = n_.serviceClient<scalevo_msgs::Starter>(header2);
+  	scalevo_msgs::Starter srv;
 
-    }else if (header2=="CMD")
+	pos2 = s.find(delimiter2);
+	if (pos2 == 1) {srv.request.on = true;}
+	else {srv.request.on = false;}
+	s.erase(0, pos2 + delimiter2.length());
+
+	pos2 = s.find(delimiter2);
+	if (pos2 == 1) {srv.request.up = true;}
+	else {srv.request.up = false;}
+	s.erase(0, pos2 + delimiter2.length());
+
+ 	if (client.call(srv))
+  	{
+		ROS_INFO("Server %s started",header2.c_str());
+  	}
+  	else
+  	{
+		ROS_ERROR("Server %s did not start",header2.c_str());
+  	}
+    }
+/**else if (header2=="CMD")
     {
 
     }else

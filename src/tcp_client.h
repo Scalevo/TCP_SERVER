@@ -36,6 +36,8 @@
 
 #include "tcp_server/ScalevoWheels.h"
 
+#include "scalevo_msgs/Starter.h"
+
 //#include <Eigen/Dense>
 #include <eigen3/Eigen/Dense>
 
