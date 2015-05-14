@@ -39,7 +39,11 @@ void tcp_client::CallbackF64(const std_msgs::Float64::ConstPtr& msg)
   if (sub.getNumPublishers() > 0) {
     std::ostringstream buff;
     buff<<msg->data;
-    std::string data = buff.str();
+    std::string data;
+    data = "DATA:";
+    data += topic;
+    data += ",";
+    data += buff.str();
     send_data(data);
   }
 }
@@ -57,16 +61,24 @@ void tcp_client::CallbackF64MA(const std_msgs::Float64MultiArray::ConstPtr& msg)
       buff<<msg->data[i];
       data += buff.str();
       data += ",";
-      send_data(data);
     }
-}
+    send_data(data);
+  }
 }
 
 // Callback for String
 void tcp_client::CallbackS(const std_msgs::String::ConstPtr& msg)
 {
   if (sub.getNumPublishers() > 0) {
-}
+	std::ostringstream buff;
+        buff<<msg->data;
+	std::string data;
+	data = "MSG:";
+	data += topic;
+	data += ",";
+	data += buff.str();
+	send_data(data);
+  }
 }
 
 void tcp_client::parser(std::string s) {
