@@ -125,7 +125,7 @@ void tcp_client::parser(std::string s) {
 
     //ROS_INFO("topic: %s",topic.c_str());
     //FIXME topic hat leerschlag davor, wieso??...
-    std::string _topic=" "+topic;
+    std::string _topic=""+topic;
 
     if ((header == "DATA") && (header2 ==_topic) )
     {
@@ -153,7 +153,6 @@ void tcp_client::parser(std::string s) {
     {
 	ros::ServiceClient client = n_.serviceClient<scalevo_msgs::Starter>(header2);
   	scalevo_msgs::Starter srv;
-
 	pos2 = s.find(delimiter2);
 	if (pos2 == 1) {srv.request.on = true;}
 	else {srv.request.on = false;}
@@ -316,6 +315,7 @@ void tcp_client::publish()
       pub = n_.advertise<std_msgs::String>(topic,1);
       std_msgs::String msg;
       msg.data=string_message;
+      ROS_INFO("Messages in scainfo: %s",msg.data.c_str());
 
 
       pub.publish(msg);

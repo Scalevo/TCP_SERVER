@@ -85,6 +85,7 @@ int main(int argc , char  **argv)
       distance_first.parser(receivedString);
       distance_last.parser(receivedString);
       scainfo.parser(receivedString);
+      align_wheelchair.parser(receivedString);
 
       ros::spinOnce();
       loop_rate.sleep();
