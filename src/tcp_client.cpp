@@ -70,16 +70,6 @@ void tcp_client::CallbackF64MA(const std_msgs::Float64MultiArray::ConstPtr& msg)
 // Callback for String
 void tcp_client::CallbackS(const std_msgs::String::ConstPtr& msg)
 {
-  if (sub.getNumPublishers() > 0) {
-	std::ostringstream buff;
-        buff<<msg->data;
-	std::string data;
-	data = "MSG:";
-	data += topic;
-	data += ",";
-	data += buff.str();
-	send_data(data);
-  }
 	if(sub.getNumPublishers() > 0){
 		std::ostringstream buffer2;
 		buffer2<<msg->data;
