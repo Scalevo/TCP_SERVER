@@ -67,8 +67,8 @@ int main(int argc , char  **argv)
 //      tcp_client localtechWatchdog(2,"watchdog",n,"scalevo_msgs::Starter");
 //      tcp_client localtechWatchdog(2,"watchdog",n,"scalevo_msgs::Starter");
 
-      // Scalaser
-
+    // Scalaser
+    tcp_client align_wheelchair(2,"align_wheelchair",n,"scalevo_msgs::Starter");
 
 
     //tcp_client stair_parameters(2,"Stair_parameters",n,"Float64MultiArray");
