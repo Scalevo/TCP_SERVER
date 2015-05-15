@@ -37,8 +37,7 @@ int main(int argc , char  **argv)
 
 
   if(isConnected){
-    //ROS --> MyRIO
-
+    //ROS --> MyRIO---------------------------------------------------------------
     tcp_client scalevo_cmd(1,"scalevo_cmd",n,"String");                           // cmd to myRIO like Assume_safe_pos, push linMot etc.
     tcp_client scalevo_msg(1,"scalevo_msg",n,"String");                           // msg to myRIO programm ready etc.
     tcp_client scalevo_err(1,"scalevo_err",n,"String");                           // err to myRIO like File not found etc.
@@ -49,7 +48,8 @@ int main(int argc , char  **argv)
     tcp_client set_vel(1,"set_vel",n,"Float64MultiArray");                        //set velocity with angle from x and speed in x direction
     tcp_client set_pos(1,"set_pos",n,"Float64MultiArray");                        //set position with angle from x and distance from the here
 
-    //MyRIO --> ROS
+
+    //MyRIO --> ROS---------------------------------------------------------------
     tcp_client imu(2,"IMU",n,"IMU");
     tcp_client encoder(2,"Encoder",n,"lasertech::ScalevoWheels");
     tcp_client lambda(2,"Lambda",n,"Float64MultiArray");
@@ -57,15 +57,13 @@ int main(int argc , char  **argv)
 
     // Services Start and Stop
     // Scadaption
-    tcp_client distance_first(2,"distance_first",n,"scalevo_msgs::Starter");	  //start and stop analysis of distance to first step
-    tcp_client distance_last(2,"distance_last",n,"scalevo_msgs::Starter");	  //start and stop analysis of distance to last step
+    tcp_client distance_first(2,"distance_first",n,"scalevo_msgs::Starter");	    //start and stop analysis of distance to first step
+    tcp_client distance_last(2,"distance_last",n,"scalevo_msgs::Starter");	      //start and stop analysis of distance to last step
 	
     // Localtech
-    tcp_client localtechWatchdog(2,"watchdog",n,"scalevo_msgs::Starter");
-    tcp_client posEstimator(2,"posEstimator",n,"scalevo_msgs::Starter");
-//      tcp_client localtechWatchdog(2,"watchdog",n,"scalevo_msgs::Starter");
-//      tcp_client localtechWatchdog(2,"watchdog",n,"scalevo_msgs::Starter");
-//      tcp_client localtechWatchdog(2,"watchdog",n,"scalevo_msgs::Starter");
+    tcp_client localtechWatchdog(2,"watchdog",n,"scalevo_msgs::Starter");         // ich hab ein watchdog gemacht, der mir die einzelne services startet je nach Gebrauch... sonst musste ich 10 services machen... ein File nur für Services eigentlich viel Besser...
+//    tcp_client posEstimator(2,"posEstimator",n,"scalevo_msgs::Starter");
+
 
     // Scalaser
     tcp_client align_wheelchair(2,"align_wheelchair",n,"scalevo_msgs::Starter");
@@ -79,6 +77,7 @@ int main(int argc , char  **argv)
     while(ros::ok())
     {
       std::string receivedString= lambda.receive_bytes(1024);
+
       lambda.parser(receivedString);
       encoder.parser(receivedString);
       imu.parser(receivedString);
@@ -86,6 +85,7 @@ int main(int argc , char  **argv)
       distance_last.parser(receivedString);
       scainfo.parser(receivedString);
       align_wheelchair.parser(receivedString);
+      localtechWatchdog.parser(receivedString);
 
       ros::spinOnce();
       loop_rate.sleep();
