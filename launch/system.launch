@@ -9,7 +9,8 @@
   <include file="$(find localtech)/launch/launcher.launch" />
   
   <!-- SCALASER -->
-  
+  <include file="$(find scalaser)/launch/angle.launch" />
+
   <!-- SCADAPTIOM -->
   
   <!-- VISION -->
