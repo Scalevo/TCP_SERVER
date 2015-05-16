@@ -111,12 +111,12 @@ void tcp_client::parser(std::string s) {
 
     while ((pos = s.find(delimiter)) != std::string::npos)
     {
-    header = s.substr(0, pos);
-    //ROS_INFO("header1: %s",header.c_str());
-    s.erase(0, pos + delimiter.length());
+      header = s.substr(0, pos);
+      //ROS_INFO("header1: %s",header.c_str());
+      s.erase(0, pos + delimiter.length());
     }
 
-    if((header=="DATA")||(header=="SRV")){
+    if((header=="DATA") || (header=="SRV")){
       pos = s.find(delimiter2);
       header2 = s.substr(0, pos);
       //ROS_INFO("header2: %s",header2.c_str());
@@ -146,22 +146,28 @@ void tcp_client::parser(std::string s) {
     	//ROS_INFO("value_%i: %f",count,values[count]);
     	//ROS_INFO("VECTOR SIZE: %zu ",values.size());
     	publish();
-      //ROS_INFO("Message has been parsed.");
-    }
-
-    else if ((header=="SRV") && (header2 ==_topic) )
+        //ROS_INFO("Message has been parsed.");
+    } 
+    if ((header=="SRV") && (header2 ==_topic) )
     {
+	//ROS_INFO("string: %s",s.c_str());
 	ros::ServiceClient client = n_.serviceClient<scalevo_msgs::Starter>(header2);
   	scalevo_msgs::Starter srv;
-	pos2 = s.find(delimiter2);
-	if (pos2 == 1) {srv.request.on = true;}
-	else {srv.request.on = false;}
-	s.erase(0, pos2 + delimiter2.length());
+	//ROS_INFO("service initialised");
 
 	pos2 = s.find(delimiter2);
-	if (pos2 == 1) {srv.request.up = true;}
+	parameter_x = s.substr(0, pos2);	
+	if (atoi(parameter_x.c_str()) == 1) {srv.request.on = true;}
+	else {srv.request.on = false;}
+	s.erase(0, pos2 + delimiter2.length());
+	//ROS_INFO("I got %s",parameter_x.c_str());
+
+	pos2 = s.find(delimiter2);
+	parameter_x = s.substr(0, pos2);	
+	if (atoi(parameter_x.c_str()) == 1) {srv.request.up = true;}
 	else {srv.request.up = false;}
 	s.erase(0, pos2 + delimiter2.length());
+	//ROS_INFO("I got2 %s",parameter_x.c_str());
 
  	if (client.call(srv))
   	{
