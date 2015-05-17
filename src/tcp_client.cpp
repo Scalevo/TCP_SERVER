@@ -80,19 +80,20 @@ void tcp_client::CallbackS(const std_msgs::String::ConstPtr& msg)
 
 		if(topic=="scalevo_cmd"){
 			data2="CMD:";
-			data2 += ",";
+//			data2 += ",";       // not conform with google drive doc
 			data2 += buffer2.str();
 			send_data(data2);
+      ROS_WARN("CMD SEND %s", data2.c_str());
 		}
 		if(topic=="scalevo_msg"){
 			data2="MSG:";
-			data2 += ",";
+//			data2 += ",";     // not conform with google drive doc
 			data2 += buffer2.str();
 			send_data(data2);
 		}
 		if(topic=="scalevo_err"){
 			data2="ERR:";
-			data2 += ",";
+//			data2 += ",";     // not conform with google drive doc
 			data2 += buffer2.str();
 			send_data(data2);
 		}	
