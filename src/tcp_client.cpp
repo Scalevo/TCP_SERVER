@@ -19,6 +19,9 @@ std::string string_message="";
 tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg_type): direction(dir), topic(top),n_(n),msg_type_(msg_type)
 {
 
+  firstTime=false; // correction of IMU angle at begining
+  z_angle_ori_old=0;
+
     if (direction==1)	// Send to MyRio
 	{
     std::string _topic = "/" + topic;
@@ -125,7 +128,7 @@ void tcp_client::parser(std::string s) {
 
     //ROS_INFO("topic: %s",topic.c_str());
     //FIXME topic hat leerschlag davor, wieso??...
-    std::string _topic=""+topic;
+    std::string _topic=" "+topic;
 
     if ((header == "DATA") && (header2 ==_topic) )
     {
@@ -197,7 +200,7 @@ void tcp_client::parser(std::string s) {
 
 void tcp_client::publish()
 {
-  if(msg_type_== "IMU" )//&& header2=="IMU")
+  if(msg_type_== "IMU")// && header2=="IMU")
   {
     //ROS_INFO("ich bin drin: %s",msg_type_.c_str());
 
@@ -206,9 +209,22 @@ void tcp_client::publish()
 
     //wrong coordinate systems: correction
     //angles not unit vector
-    float x_angle_ori=values[1];      //Roll
-    float y_angle_ori=values[0];      //Pitch
-    float z_angle_ori=-values[2];     //Yaw
+    float x_angle_ori;      //Roll
+    float y_angle_ori;      //Pitch
+    float z_angle_ori;     //Yaw
+
+
+    if (firstTime){
+        z_angle_ori_old=-values[2];
+        firstTime=false;
+    }
+
+    //wrong coordinate systems: correction
+    //angles not unit vector
+    x_angle_ori=values[1];      //Roll
+    y_angle_ori=values[0];      //Pitch
+    z_angle_ori=-values[2]-z_angle_ori_old;     //Yaw
+
 
     float x_accel=values[4];
     float y_accel=values[3];
@@ -252,6 +268,10 @@ void tcp_client::publish()
     tf::quaternionTFToMsg(q_tf, q_qm);
 
     msg.orientation=q_qm;
+    msg.orientation_covariance[0]=x_angle_ori;
+    msg.orientation_covariance[1]=y_angle_ori;
+    msg.orientation_covariance[2]=z_angle_ori;
+
     /**
     msg.orientation.y=q_qm.y;
     msg.orientation.z=q_qm.z;
@@ -306,11 +326,11 @@ void tcp_client::publish()
       msg.travel[0]=values[0]*2*PI;
       msg.travel[1]=values[1]*2*PI;
 
-      msg.speed[0]=values[2]*2*PI/60;           //RTM to rad/s
-      msg.speed[1]=values[3]*2*PI/60;           //RPM to rad/s
+      msg.speed[0]=values[2]*2*PI/60;           // RTM to rad/s
+      msg.speed[1]=values[3]*2*PI/60;           // RPM to rad/s
 
-      msg.travel_tracks[0]=values[4];
-      msg.travel_tracks[1]=values[5];
+      msg.travel_tracks[0]=values[4];           // Achtung nicht integriert... [0,1]--> nicht getestet
+      msg.travel_tracks[1]=values[5];           // Achtung nicht integriert....[0,1] --> nicht getestet
 
       pub.publish(msg);
       ROS_INFO("Topic %s has been published.",topic.c_str());
