@@ -66,6 +66,9 @@ private:
   std::string header;
   std::string header2;
 
+  bool firstTime; // Correction of IMU Angle at beginning
+  float z_angle_ori_old;
+
 public:
   tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg_type);
   bool send_data(string data);
