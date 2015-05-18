@@ -19,7 +19,7 @@ std::string string_message="";
 tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg_type): direction(dir), topic(top),n_(n),msg_type_(msg_type)
 {
 
-  firstTime=false; // correction of IMU angle at begining
+  firstTime=true; // correction of IMU angle at begining
   z_angle_ori_old=0;
 
     if (direction==1)	// Send to MyRio
@@ -102,100 +102,98 @@ void tcp_client::CallbackS(const std_msgs::String::ConstPtr& msg)
 
 void tcp_client::parser(std::string s) {
 
-    values.clear();
+  values.clear();
 
-    std::string delimiter = ":";
-    std::string delimiter2 = ",";
-    size_t pos = 0;
-    size_t pos2 = 0;
-    int count=0;
+  std::string delimiter = ":";
+  std::string delimiter2 = ",";
+  size_t pos = 0;
+  size_t pos2 = 0;
+  int count=0;
 
-    std::string parameter_x;
-    float values_parameter[12];
+  std::string parameter_x;
+  float values_parameter[12];
 
-    while ((pos = s.find(delimiter)) != std::string::npos)
+  while ((pos = s.find(delimiter)) != std::string::npos)
+  {
+    header = s.substr(0, pos);
+    //ROS_INFO("header1: %s",header.c_str());
+    s.erase(0, pos + delimiter.length());
+  }
+
+  if((header=="DATA") || (header=="SRV")){
+    pos = s.find(delimiter2);
+    header2 = s.substr(0, pos);
+    //ROS_INFO("header2: %s",header2.c_str());
+    s.erase(0, pos + delimiter2.length());
+  }
+
+  //ROS_INFO("topic: %s",topic.c_str());
+  //FIXME topic hat leerschlag davor, wieso??...
+  std::string _topic=" "+topic;
+
+  if ((header == "DATA") && (header2 ==_topic) )
+  {
+    while ((pos2 = s.find(delimiter2)) != std::string::npos)
     {
-      header = s.substr(0, pos);
-      //ROS_INFO("header1: %s",header.c_str());
-      s.erase(0, pos + delimiter.length());
+      parameter_x = s.substr(0, pos2);
+      values_parameter[count]=atof (parameter_x.c_str());
+      values.push_back(atof (parameter_x.c_str()));
+      //ROS_INFO("value_%i: %f",count,values[count]);
+      count++;
+      s.erase(0, pos2 + delimiter2.length());
     }
+    parameter_x = s.substr(0, pos2);
 
-    if((header=="DATA") || (header=="SRV")){
-      pos = s.find(delimiter2);
-      header2 = s.substr(0, pos);
-      //ROS_INFO("header2: %s",header2.c_str());
-      s.erase(0, pos + delimiter2.length());
-    }
+    values_parameter[count]=atof (parameter_x.c_str());
+    values.push_back(atof (parameter_x.c_str()));
 
-    //ROS_INFO("topic: %s",topic.c_str());
-    //FIXME topic hat leerschlag davor, wieso??...
-    std::string _topic=" "+topic;
+    //ROS_INFO("value_%i: %f",count,values[count]);
+    //ROS_INFO("VECTOR SIZE: %zu ",values.size());
+    publish();
+    //ROS_INFO("Message has been parsed.");
+  }
+  if ((header=="SRV") && (header2 ==_topic) )
+  {
+    //ROS_INFO("string: %s",s.c_str());
+    ros::ServiceClient client = n_.serviceClient<scalevo_msgs::Starter>(header2);
+    scalevo_msgs::Starter srv;
+    //ROS_INFO("service initialised");
 
-    if ((header == "DATA") && (header2 ==_topic) )
+    pos2 = s.find(delimiter2);
+    parameter_x = s.substr(0, pos2);
+    if (atoi(parameter_x.c_str()) == 1) {srv.request.on = true;}
+    else {srv.request.on = false;}
+    s.erase(0, pos2 + delimiter2.length());
+    //ROS_INFO("I got %s",parameter_x.c_str());
+
+    pos2 = s.find(delimiter2);
+    parameter_x = s.substr(0, pos2);
+    if (atoi(parameter_x.c_str()) == 1) {srv.request.up = true;}
+    else {srv.request.up = false;}
+    s.erase(0, pos2 + delimiter2.length());
+    //ROS_INFO("I got2 %s",parameter_x.c_str());
+    if (client.call(srv))
     {
-    	while ((pos2 = s.find(delimiter2)) != std::string::npos)
-    	{
-    		parameter_x = s.substr(0, pos2);
-    		values_parameter[count]=atof (parameter_x.c_str());
-    		values.push_back(atof (parameter_x.c_str()));
-    		//ROS_INFO("value_%i: %f",count,values[count]);
-    		count++;
-   		s.erase(0, pos2 + delimiter2.length());
-    	}
-    	parameter_x = s.substr(0, pos2);
-
-    	values_parameter[count]=atof (parameter_x.c_str());
-    	values.push_back(atof (parameter_x.c_str()));
-
-    	//ROS_INFO("value_%i: %f",count,values[count]);
-    	//ROS_INFO("VECTOR SIZE: %zu ",values.size());
-    	publish();
-        //ROS_INFO("Message has been parsed.");
-    } 
-    if ((header=="SRV") && (header2 ==_topic) )
-    {
-	//ROS_INFO("string: %s",s.c_str());
-	ros::ServiceClient client = n_.serviceClient<scalevo_msgs::Starter>(header2);
-  	scalevo_msgs::Starter srv;
-	//ROS_INFO("service initialised");
-
-	pos2 = s.find(delimiter2);
-	parameter_x = s.substr(0, pos2);	
-	if (atoi(parameter_x.c_str()) == 1) {srv.request.on = true;}
-	else {srv.request.on = false;}
-	s.erase(0, pos2 + delimiter2.length());
-	//ROS_INFO("I got %s",parameter_x.c_str());
-
-	pos2 = s.find(delimiter2);
-	parameter_x = s.substr(0, pos2);	
-	if (atoi(parameter_x.c_str()) == 1) {srv.request.up = true;}
-	else {srv.request.up = false;}
-	s.erase(0, pos2 + delimiter2.length());
-	//ROS_INFO("I got2 %s",parameter_x.c_str());
-
- 	if (client.call(srv))
-  	{
-		ROS_INFO("Server %s started",header2.c_str());
-  	}
-  	else
-  	{
-		ROS_ERROR("Server %s did not start",header2.c_str());
-  	}
+      ROS_INFO("Server %s started",header2.c_str());
     }
-
-    if((header=="MSG")||(header=="ERR")){
-      string_message=s;
-      publish();
-    }
-
-/**else if (header2=="CMD")
+    else
     {
-
-    }else
-    {
-      ROS_ERROR("NO MESSAGE HEADER RECOGNIZED");
+      ROS_ERROR("Server %s did not start",header2.c_str());
     }
-**/
+  }
+
+  if((header=="MSG")||(header=="ERR")||(header=="CMD")){
+    string_message=s;
+    publish();
+  }
+    /**else if (header2=="CMD")
+  {
+
+  }else
+  {
+  ROS_ERROR("NO MESSAGE HEADER RECOGNIZED");
+  }
+  **/
 
 }
 
@@ -217,13 +215,14 @@ void tcp_client::publish()
 
     if (firstTime){
         z_angle_ori_old=-values[2];
+        ROS_WARN("ich bin drin!!!!!");
         firstTime=false;
     }
 
     //wrong coordinate systems: correction
     //angles not unit vector
-    x_angle_ori=values[1];      //Roll
-    y_angle_ori=values[0];      //Pitch
+    x_angle_ori=values[1];                     //Roll
+    y_angle_ori=values[0];                    //Pitch
     z_angle_ori=-values[2]-z_angle_ori_old;     //Yaw
 
 
@@ -336,20 +335,16 @@ void tcp_client::publish()
       pub.publish(msg);
       ROS_INFO("Topic %s has been published.",topic.c_str());
     }
-    else if(msg_type_== "String")
+    else if(msg_type_== "String" && topic=="scainfo")
     {
-
       pub = n_.advertise<std_msgs::String>(topic,1);
       std_msgs::String msg;
       msg.data=string_message;
-      ROS_INFO("Messages in scainfo: %s",msg.data.c_str());
-
+      ROS_ERROR("Messages in scainfo: %s",msg.data.c_str());
 
       pub.publish(msg);
 
-
-      ROS_INFO("Topic %s has been published.",topic.c_str());
-
+      ROS_ERROR("Topic %s has been published.",topic.c_str());
     }
     else
     {
