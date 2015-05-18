@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node pkg="tcp_server" type="tcp_client" name="tcp_client" output="screen" >
+  </node>
+  <param name="/tcp_server/hostname" type="string" value="192.168.10.103" />
+  <param name="/tcp_server/port" type="int" value="4000" />
+</launch>
