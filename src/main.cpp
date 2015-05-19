@@ -43,11 +43,8 @@ int main(int argc , char  **argv)
     tcp_client scalevo_err(1,"scalevo_err",n,"String");                           // err to myRIO like File not found etc.
     
     tcp_client beta(1,"beta",n,"Float64");                                        // Angle on the stairs
-    tcp_client stair_parameters(1,"stair_parameters",n,"Float64MultiArray");      //List of parameters:
-    tcp_client distance(1,"distance",n,"Float64MultiArray");          		        //Distance to steps (first_right,first_left,last_right,last_left)
-    tcp_client set_vel(1,"set_vel",n,"Float64MultiArray");                        //set velocity with angle from x and speed in x direction
-    tcp_client set_pos(1,"set_pos",n,"Float64MultiArray");                        //set position with angle from x and distance from the here
-
+    tcp_client stair_parameters(1,"stair_parameters",n,"Float64MultiArray");      // List of parameters: step height, step depth, distance traveled, sensor height, sensor angle
+    tcp_client distance(1,"distance",n,"Float64MultiArray");          		        // Distance to steps (first_right,first_left,last_right,last_left)
 
     //MyRIO --> ROS---------------------------------------------------------------
     tcp_client imu(2,"IMU",n,"IMU");
