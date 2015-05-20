@@ -19,7 +19,7 @@ std::string string_message="";
 tcp_client::tcp_client(int dir,std::string top,ros::NodeHandle n,std::string msg_type): direction(dir), topic(top),n_(n),msg_type_(msg_type)
 {
 
-  firstTime=false; // correction of IMU angle at begining
+  firstTime=true; // correction of IMU angle at beginning, this variable should be true here, DO NOT change its value!!!!!
   z_angle_ori_old=0;
 
     if (direction==1) // Send to MyRio
@@ -203,29 +203,23 @@ void tcp_client::publish()
 {
   if(msg_type_== "IMU")// && header2=="IMU")
   {
-    //ROS_INFO("ich bin drin: %s",msg_type_.c_str());
-
     pub = n_.advertise<sensor_msgs::Imu>("IMU",5);
     sensor_msgs::Imu msg;
 
     //wrong coordinate systems: correction
-    //angles not unit vector
-    float x_angle_ori;      //Roll
-    float y_angle_ori;      //Pitch
-    float z_angle_ori;     //Yaw
-
-
+    float x_angle_ori;      			//Roll
+    float y_angle_ori;      			//Pitch
+    float z_angle_ori;     			//Yaw
+	
+    // making sure, yaw is 0 at the beginning
     if (firstTime){
         z_angle_ori_old=-values[2];
         firstTime=false;
     }
 
-    //wrong coordinate systems: correction
-    //angles not unit vector
-    x_angle_ori=values[1];      //Roll
-    y_angle_ori=values[0];      //Pitch
+    x_angle_ori=values[1];      		//Roll
+    y_angle_ori=values[0];      		//Pitch
     z_angle_ori=-values[2]-z_angle_ori_old;     //Yaw
-
 
     float x_accel=values[4];
     float y_accel=values[3];
@@ -234,37 +228,13 @@ void tcp_client::publish()
     float x_angle_vel=-values[7];
     float y_angle_vel=values[6];
     float z_angle_vel=values[8];
-    //conversion from angle to unit vector
-    /** DO NOT delete, needs testing...
-    float Ax[3][3] =
-    {
-      {  1,  0,  0 },
-      {  0, cos(x_angle_ori), sin(x_angle_ori) },
-      { 0, -sin(x_angle_ori), cos(x_angle_ori) }
-    };
-
-    float Ay[3][3] =
-    {
-      {  cos(y_angle_ori),  0,  -sin(y_angle_ori) },
-      {  0, 1, 0 },
-      { sin(y_angle_ori), 0, cos(y_angle_ori) }
-    };
-
-    float Az[3][3] =
-
-    {
-      {  cos(z_angle_ori),  sin(z_angle_ori),  0 },
-      {  -sin(z_angle_ori), cos(z_angle_ori), 0 },
-      { 0, 0, 1 }
-    };
-    **/
 
     msg.header.stamp = ros::Time::now();
     msg.header.frame_id="odom";
 
+    // transforming angles into quaternions for imu message
     tf::Quaternion q_tf;
     q_tf.setRPY(x_angle_ori,y_angle_ori,z_angle_ori);
-
     geometry_msgs::Quaternion q_qm;
     tf::quaternionTFToMsg(q_tf, q_qm);
 
@@ -273,11 +243,6 @@ void tcp_client::publish()
     msg.orientation_covariance[1]=y_angle_ori;
     msg.orientation_covariance[2]=z_angle_ori;
 
-    /**
-    msg.orientation.y=q_qm.y;
-    msg.orientation.z=q_qm.z;
-    msg.orientation.w=q_qm.w;
-     **/
     msg.angular_velocity.x=x_angle_vel;
     msg.angular_velocity.y=y_angle_vel;
     msg.angular_velocity.z=z_angle_vel;
@@ -300,7 +265,7 @@ void tcp_client::publish()
       ROS_INFO_ONCE("Topic %s has been published.",topic.c_str());
 
     }
-    else if(msg_type_==  "Float64MultiArray")
+    else if(msg_type_==  "Float64MultiArray") 	// Lambdas etc. 
     {
       pub = n_.advertise<std_msgs::Float64MultiArray>(topic,5);
       std_msgs::Float64MultiArray msg;
@@ -311,18 +276,14 @@ void tcp_client::publish()
       ROS_INFO_ONCE("Topic %s has been published.",topic.c_str());
 
     }
-    else if(msg_type_==  "lasertech::ScalevoWheels")
+    else if(msg_type_==  "lasertech::ScalevoWheels") // Encoder data
     {
-      //TODO evlt receiving only speed in rad/s and not in meter per sec.
-
-      //ROS_INFO("Topic %s would have been published, if it had been implemented.",topic.c_str());
 
       pub = n_.advertise<tcp_server::ScalevoWheels>(topic,1);
       tcp_server::ScalevoWheels msg;
 
       msg.header.stamp = ros::Time::now();
       msg.header.frame_id="odom";
-
 
       msg.travel[0]=values[0]*2*PI;
       msg.travel[1]=values[1]*2*PI;
@@ -336,7 +297,7 @@ void tcp_client::publish()
       pub.publish(msg);
       ROS_INFO_ONCE("Topic %s has been published.",topic.c_str());
     }
-    else if(msg_type_== "String")
+    else if(msg_type_== "String")			// CMD, MSG, ERR Messages from myRIO
     {
 
       pub = n_.advertise<std_msgs::String>(topic,1);
@@ -344,16 +305,12 @@ void tcp_client::publish()
       msg.data=string_message;
       ROS_INFO("Messages in scainfo: %s",msg.data.c_str());
 
-
       pub.publish(msg);
-
-
       ROS_INFO_ONCE("Topic %s has been published.",topic.c_str());
-
     }
-    else
+    else						// unknown stuff
     {
-      ROS_WARN_ONCE("Incorrect msg_type: %s",msg_type_.c_str());
+      ROS_ERROR("Incorrect msg_type: %s",msg_type_.c_str());
     }
 }
 
