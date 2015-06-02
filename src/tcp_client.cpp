@@ -152,7 +152,7 @@ void tcp_client::parser(std::string s) {
       publish();
         //ROS_INFO("Message has been parsed.");
     } 
-    if ((header=="SRV") && (header2 ==_topic) )
+    if ((header=="SRV") && (header2 == topic) )
     {
   //ROS_INFO("string: %s",s.c_str());
   ros::ServiceClient client = n_.serviceClient<scalevo_msgs::Starter>(header2);

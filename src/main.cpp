@@ -44,7 +44,7 @@ int main(int argc , char  **argv)
     
     tcp_client beta(1,"beta",n,"Float64");                                        // Angle on the stairs
     tcp_client stair_parameters(1,"stair_parameters",n,"Float64MultiArray");      // List of parameters: step height, step depth, distance traveled, sensor height, sensor angle
-    tcp_client distance(1,"distance",n,"Float64MultiArray");          		        // Distance to steps (first_right,first_left,last_right,last_left)
+    tcp_client distance(1,"distance_stair",n,"Float64MultiArray");          		        // Distance to steps (first_right,first_left,last_right,last_left)
 
     //MyRIO --> ROS---------------------------------------------------------------
     tcp_client imu(2,"IMU",n,"IMU");
