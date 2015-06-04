@@ -276,7 +276,7 @@ void tcp_client::publish()
       ROS_INFO_ONCE("Topic %s has been published.",topic.c_str());
 
     }
-    else if(msg_type_==  "lasertech::ScalevoWheels") // Encoder data
+    else if(msg_type_==  "tcp_server::ScalevoWheels") // Encoder data
     {
 
       pub = n_.advertise<tcp_server::ScalevoWheels>(topic,1);

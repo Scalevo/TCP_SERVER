@@ -48,7 +48,7 @@ int main(int argc , char  **argv)
 
     //MyRIO --> ROS---------------------------------------------------------------
     tcp_client imu(2,"IMU",n,"IMU");
-    tcp_client encoder(2,"Encoder",n,"lasertech::ScalevoWheels");
+    tcp_client encoder(2,"Encoder",n,"tcp_server::ScalevoWheels");
     tcp_client lambda(2,"Lambda",n,"Float64MultiArray");
     tcp_client scainfo(2,"scainfo",n,"String");                                   // MSG, ERR, INFO etc from myRIO is published here
 
